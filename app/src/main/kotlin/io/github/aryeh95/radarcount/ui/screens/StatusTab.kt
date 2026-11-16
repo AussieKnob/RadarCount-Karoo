@@ -11,11 +11,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,23 +31,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.aryeh95.radarcount.R
 import io.github.aryeh95.radarcount.RadarCountExtension
+import io.github.aryeh95.radarcount.data.SettingsRepository
 import io.github.aryeh95.radarcount.engine.RadarStatus
 import io.github.aryeh95.radarcount.engine.Units
 import io.github.aryeh95.radarcount.ui.theme.ApproachAmber
+import io.github.aryeh95.radarcount.ui.theme.BackButton
 import io.github.aryeh95.radarcount.ui.theme.CardWhite
 import io.github.aryeh95.radarcount.ui.theme.ClearGreen
 import io.github.aryeh95.radarcount.ui.theme.DangerRed
 import io.github.aryeh95.radarcount.ui.theme.IdleGrey
 import io.github.aryeh95.radarcount.ui.theme.Ink
 import io.github.aryeh95.radarcount.ui.theme.InkMuted
-import io.github.aryeh95.radarcount.ui.theme.KarooSlate
 
 /**
  * The Status tab: what the radar sees now, the cars passed and the last
  * approach speed, read from the running extension (all blank without one).
  */
 @Composable
-fun StatusTab(extension: RadarCountExtension?, onResetCount: () -> Unit) {
+fun StatusTab(repository: SettingsRepository, extension: RadarCountExtension?, onResetCount: () -> Unit) {
     val feed = extension?.radarFeed
     val status = feed?.status?.collectAsState()?.value ?: RadarStatus.Off
     val passed = feed?.passCount?.collectAsState()?.value ?: 0
@@ -49,6 +56,9 @@ fun StatusTab(extension: RadarCountExtension?, onResetCount: () -> Unit) {
     val closingMps = feed?.closingSpeedMps?.collectAsState()?.value
     val riderMps = extension?.riderSpeedMps?.collectAsState()?.value ?: 0.0
     val imperial = extension?.imperialUnits?.collectAsState()?.value ?: false
+    var resetDialogVisible by remember { mutableStateOf(false) }
+
+    val settings by repository.settings.collectAsState()
 
     Column(
         modifier = Modifier
@@ -66,15 +76,50 @@ fun StatusTab(extension: RadarCountExtension?, onResetCount: () -> Unit) {
             MaxStat(maxSpeed, imperial)
         }
         Spacer(modifier = Modifier.height(12.dp))
-        TextButton(onClick = onResetCount) {
-            Text(stringResource(R.string.status_reset_count), color = KarooSlate)
+        Button(
+            onClick = {
+                resetDialogVisible = true
+                //onResetCount()
+            },
+            enabled = !settings.resetOnRideStart,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BackButton,
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.status_reset_count),
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.status_hint),
             style = MaterialTheme.typography.bodySmall,
             color = InkMuted,
             textAlign = TextAlign.Center
+        )
+    }
+
+    if (resetDialogVisible){
+        AlertDialog(
+            onDismissRequest = { resetDialogVisible = false },
+            confirmButton = {
+                Button(onClick = {
+                    resetDialogVisible = false
+                    onResetCount()
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BackButton),
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    resetDialogVisible = false
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BackButton),
+                ) { Text("Cancel") }
+            },
+            title = { Text("Reset Pass Count") }, text = { Text("Do you really want to reset the vehicle passed count?") }
         )
     }
 }
