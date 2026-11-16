@@ -65,6 +65,7 @@ abstract class FieldDataType(
          */
         val PREVIEW_INPUT = RenderInput(
             state = RadarStatus.Live(level = 2, vehicles = 2, nearestM = 174),
+            maxSpeed = 200.0,
             passCount = 48,
             closingSpeedMps = 20.0,
             riderSpeedMps = 7.0,
@@ -97,6 +98,7 @@ abstract class FieldDataType(
     data class RenderInput(
         val state: RadarStatus,
         val numVehicles: Int,
+        val maxSpeed: Double,
         val passCount: Int,
         val closingSpeedMps: Double?,
         val riderSpeedMps: Double,
@@ -145,6 +147,7 @@ abstract class FieldDataType(
         return combine(
             feed.status,
             feed.numVehicles,
+            feed.maxSpeed,
             feed.passCount,
             feed.closingSpeedMps,
             service.riderSpeedMps,
@@ -162,6 +165,7 @@ abstract class FieldDataType(
                 settings = values[5] as Settings,
                 rideTimeMs = values[6] as Long,
                 lastPass = values[7] as TargetTracker.Pass?
+                maxSpeed = values[3] as Double,
                 numVehicles = values[2] as Int,
             )
         }.distinctUntilChanged()

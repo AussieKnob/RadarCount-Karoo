@@ -32,7 +32,9 @@
     <string name="status_clear">Clear</string>
     <string name="status_car_behind">Behind</string>
     <string name="status_passed">PASSED</string>
-    <string name="status_approach">APPROACH %s</string>
+    <string name="status_max_speed">MAX</string>
+    <string name="status_approach">APPROACH</string>
+    <!-- string name="status_approach">APPROACH (%s)</string -->
     <string name="status_road_speed">Abs %1$d %2$s</string>
     <string name="status_hint">Add the RadarCount data fields to a ride page. Rides record mybiketraffic.com-compatible FIT fields automatically.</string>
     <string name="status_reset_count">Reset count</string>

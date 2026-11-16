@@ -45,6 +45,7 @@ fun StatusTab(extension: RadarCountExtension?, onResetCount: () -> Unit) {
     val feed = extension?.radarFeed
     val status = feed?.status?.collectAsState()?.value ?: RadarStatus.Off
     val passed = feed?.passCount?.collectAsState()?.value ?: 0
+    val maxSpeed = feed?.maxSpeed?.collectAsState()?.value ?: 0.0
     val closingMps = feed?.closingSpeedMps?.collectAsState()?.value
     val riderMps = extension?.riderSpeedMps?.collectAsState()?.value ?: 0.0
     val imperial = extension?.imperialUnits?.collectAsState()?.value ?: false
@@ -62,6 +63,7 @@ fun StatusTab(extension: RadarCountExtension?, onResetCount: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Stat(stringResource(R.string.status_passed), passed.toString())
             ApproachStat(closingMps.takeIf { status.traffic != null }, riderMps, imperial)
+            MaxStat(maxSpeed, imperial)
         }
         Spacer(modifier = Modifier.height(12.dp))
         TextButton(onClick = onResetCount) {
@@ -111,6 +113,17 @@ private fun ApproachStat(closingMps: Double?, riderMps: Double, imperial: Boolea
         label = stringResource(R.string.status_approach, unit),
         value = closing?.toString() ?: "--",
         footer = road?.let { stringResource(R.string.status_road_speed, it, unit) } ?: ""
+    )
+}
+
+@Composable
+private fun MaxStat(maxSpeedMps: Double, imperial: Boolean) {
+    val unit = Units.speedUnitLabel(imperial, true)
+    val max = maxSpeedMps.let { RadarCountExtension.toUserSpeedUnits(it, imperial) }.toInt()
+    Stat(
+        label = stringResource(R.string.status_max_speed, unit),
+        value = if (max > 0) max.toString() else "--",
+        footer = if (max > 0) unit else "",
     )
 }
 
