@@ -21,8 +21,6 @@ object FieldColors {
 
     private const val TEXT_DAY = 0xFF000000.toInt()
     private const val TEXT_NIGHT = 0xFFFFFFFF.toInt()
-    private const val LABEL_DAY = 0xFF555555.toInt()
-    private const val LABEL_NIGHT = 0xFFBBBBBB.toInt()
     private const val LABEL_DAY = 0xFF000000.toInt()
     private const val LABEL_NIGHT = 0xFFFFFFFF.toInt()
     private const val THREAT_DAY_NIGHT = 0xFF000000.toInt()

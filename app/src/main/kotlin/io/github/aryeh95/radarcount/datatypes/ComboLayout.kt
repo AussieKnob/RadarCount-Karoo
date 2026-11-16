@@ -69,8 +69,6 @@ object ComboLayout {
         val speedDigits = speed?.toString() ?: "--"
         val distDigits = distance?.toString() ?: "--"
         val unitsInCaptions = settings.comboUnitsInCaptions
-        val speedValue = if (unitsInCaptions || speed == null) speedDigits else speedDigits + labels.speedUnit.lowercase()
-        val distValue = if (unitsInCaptions || distance == null) distDigits else distDigits + labels.distUnit.lowercase()
         val speedValue = if (unitsInCaptions || speed == null) speedDigits else speedDigits + if (settings.speedUnits) labels.speedUnit.lowercase() else ""
         val distValue = if (unitsInCaptions || distance == null) distDigits else distDigits + if (settings.distanceUnits) labels.distUnit.lowercase() else ""
         val speedCaption = if (showsAbsolute) labels.speedAbs else labels.speedRel
