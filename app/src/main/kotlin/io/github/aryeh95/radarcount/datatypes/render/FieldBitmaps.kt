@@ -8,6 +8,8 @@ import android.graphics.Rect
 import io.github.aryeh95.radarcount.R
 import io.github.aryeh95.radarcount.datatypes.ComboLayout
 import io.github.aryeh95.radarcount.datatypes.FieldFont
+import io.github.aryeh95.radarcount.datatypes.karooWideField
+import io.github.aryeh95.radarcount.datatypes.render.FieldHeader.karooSp
 import io.hammerhead.karooext.models.ViewConfig
 import kotlin.math.ceil
 import kotlin.math.roundToInt
@@ -39,7 +41,7 @@ object FieldBitmaps {
     /** Single values keep this much clear of the tile's sides, like the Karoo's own fields: the padding in field_value_*.xml. */
     const val VALUE_SIDE_DP = 5f
     /** Between the value's baseline and the top of the tag under it, as a fraction of the drawn value size. */
-    private const val TAG_GAP = 0.35f
+    private const val TAG_GAP = 0.25f // 0.35f -> 0.25f
     /** Spare pixel round a cropped bitmap so anti-aliased edges are not cut. */
     private const val EDGE_PX = 1f
 
@@ -51,7 +53,7 @@ object FieldBitmaps {
      * left if the host's view is taller than the tile it reported.
      * Transparent where nothing is drawn.
      */
-    fun combo(context: Context, plan: ComboLayout.Plan, config: ViewConfig, density: Float, palette: FieldColors.Palette, header: Boolean, threatLevel: Int): ComboImage {
+    fun combo(context: Context, plan: ComboLayout.Plan, config: ViewConfig, density: Float, palette: FieldColors.Palette, header: Boolean, showIcons: Boolean, threatLevel: Int, comboIdleStatus: Boolean, showComboIdle: Boolean): ComboImage {
         val w = config.viewSize.first.coerceAtLeast(1)
         val h = config.viewSize.second.coerceAtLeast(1)
         val text = FieldText()
@@ -65,6 +67,9 @@ object FieldBitmaps {
         val bitmap = newBitmap(w, bodyH)
         val canvas = Canvas(bitmap)
         val glyphs = mutableListOf<Rect>()
+
+        var radarIconDrawn = false
+
         for (t in a.texts) {
             // Captions in the label grey; a held pass speed in the darker held grey.
             val color = when {
@@ -74,33 +79,98 @@ object FieldBitmaps {
                 t.dim -> palette.held
                 else -> palette.text
             }
-            glyphs += text.draw(canvas, t.text, t.font, t.sizePx, t.centerX, t.baseline, Paint.Align.CENTER, color)
+
+            // Draw the icon if the header is disabled, data icons are enabled and the caption contains text
+            if (!header && showIcons && !radarIconDrawn && t.font == FieldFont.CAPTION) {
+
+                val karooSp = karooSp(config)
+
+                val gapPx = HEADER_ICON_GAP_DP * density
+                val captionWidth = text.width(t.text, t.font, t.sizePx)
+                val iconPx = (if (config.karooWideField) (karooSp * density) else 0.0f).roundToInt()
+
+                // Where to start the caption text
+                var textLeft = (t.centerX - captionWidth / 2) + gapPx.roundToInt()
+
+                // comboIdleActive: !active && s.comboIdle == ComboIdleSetting.COUNT
+                // Non-comboIdle data fields need to be shifted
+                if (!comboIdleStatus || !config.karooWideField) {
+                    // Positive moves it to the left
+                    textLeft -= gapPx.roundToInt()
+                }
+
+                val ink = text.ink(t.text, t.font, t.sizePx)
+                val captionTop = t.baseline + ink.top
+                val captionBottom = t.baseline + ink.bottom
+
+                val iconTop = ((captionTop + captionBottom - iconPx) / 2).roundToInt()
+                val icon = checkNotNull(context.getDrawable(R.drawable.ic_radar)).mutate()
+
+                icon.setTint(FieldColors.RADAR_HEADER_GREEN)
+
+                // Icon on the left next to the caption text (centered) on combo page.
+                if (comboIdleStatus && showComboIdle) {
+                    icon.setBounds(
+                        (textLeft - gapPx - iconPx).roundToInt(),
+                        iconTop,
+                        (textLeft - gapPx).roundToInt(),
+                        iconTop + iconPx
+                    )
+                    // Icon on the left edge of the active combo page only if no threatLevel.
+                } else if (threatLevel == 0){
+                    val iconLeft = ((if (config.gridSize.first <= 20) FieldHeader.SIDE_NARROW_DP else FieldHeader.SIDE_DP) * density).toInt() + FieldHeader.layoutPx(
+                        FieldHeader.INSET_DP,
+                        density
+                    )
+                    icon.setBounds(iconLeft, iconTop, iconLeft + iconPx, iconTop + iconPx)
+                }
+                icon.draw(canvas)
+                glyphs.add(Rect(icon.bounds))
+
+                glyphs += text.draw(canvas, t.text, t.font, t.sizePx, textLeft, t.baseline, Paint.Align.LEFT, color)
+
+                radarIconDrawn = true
+            } else {
+                glyphs += text.draw(canvas, t.text, t.font, t.sizePx, t.centerX, t.baseline, Paint.Align.CENTER, color)
+            }
         }
         val strip = if (header) {
             val b = newBitmap(w, headerPx)
             FieldImage(b, drawHeader(context, Canvas(b), text, w, headerPx.toFloat(), density,
                 // Set palette based on threatLevel; yellow only
-                color = if (threatLevel != 0) palette.threat else palette.text))
+                color = if (threatLevel != 0) palette.threat else palette.text , showIcons = showIcons))
         } else {
             null
         }
         return ComboImage(strip, FieldImage(bitmap, glyphs))
     }
 
-    /** Icon and RADAR centred in a strip [headerPx] tall. */
-    private fun drawHeader(context: Context, canvas: Canvas, text: FieldText, width: Int, headerPx: Float, density: Float, color: Int): List<Rect> {
+    /** RADAR active (Header): Icon and RADAR centred in a strip [headerPx] tall. */
+    private fun drawHeader(context: Context, canvas: Canvas, text: FieldText, width: Int, headerPx: Float, density: Float, color: Int, showIcons: Boolean): List<Rect> {
         val iconPx = (HEADER_ICON_DP * density).roundToInt()
         val gapPx = HEADER_ICON_GAP_DP * density
         val sizePx = HEADER_SP * density
-        val left = ((width - (iconPx + gapPx + text.width(HEADER_TEXT, FieldFont.HEADER, sizePx))) / 2).roundToInt()
+        val textWidth = text.width(HEADER_TEXT, FieldFont.HEADER, sizePx)
+        val contentWidth = textWidth + if (showIcons) iconPx + gapPx else 0f
+        val left = ((width - contentWidth) / 2).roundToInt()
         val iconTop = ((headerPx - iconPx) / 2).roundToInt()
-        val icon = checkNotNull(context.getDrawable(R.drawable.ic_radar)).mutate()
-        icon.setTint(FieldColors.RADAR_HEADER_GREEN)
-        icon.setBounds(left, iconTop, left + iconPx, iconTop + iconPx)
-        icon.draw(canvas)
+        val bounds = mutableListOf<Rect>()
+        val textLeft = if (showIcons) left + iconPx + gapPx else left.toFloat()
+        if (showIcons) {
+            val icon = checkNotNull(context.getDrawable(R.drawable.ic_radar)).mutate()
+            icon.setTint(FieldColors.RADAR_HEADER_GREEN)
+            icon.setBounds(left, iconTop, left + iconPx, iconTop + iconPx)
+            icon.draw(canvas)
+            bounds.add(Rect(icon.bounds))
+        }
         val baseline = (headerPx + text.bandHeight(FieldFont.HEADER) * sizePx) / 2
-        val label = text.draw(canvas, HEADER_TEXT, FieldFont.HEADER, sizePx, left + iconPx + gapPx, baseline, Paint.Align.LEFT, color)
-        return listOf(Rect(icon.bounds), label)
+        val label = text.draw(
+            canvas, HEADER_TEXT, FieldFont.HEADER, sizePx,
+            textLeft, baseline, Paint.Align.LEFT, color
+        )
+
+        bounds.add(label)
+        return bounds
     }
 
     /**

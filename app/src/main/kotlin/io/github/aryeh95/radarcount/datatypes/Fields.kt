@@ -3,6 +3,7 @@ package io.github.aryeh95.radarcount.datatypes
 import android.content.Context
 import io.github.aryeh95.radarcount.R
 import io.github.aryeh95.radarcount.RadarCountExtension
+import io.github.aryeh95.radarcount.data.ComboIdleSetting
 import io.github.aryeh95.radarcount.data.PassHoldSetting
 import io.github.aryeh95.radarcount.data.Settings
 import io.github.aryeh95.radarcount.data.SpeedSetting
@@ -22,8 +23,8 @@ import kotlin.math.roundToInt
  * (extension_info.xml), and the setting that turns it off.
  */
 /** A single field's header: its name (which may depend on the settings), icon, and whether it shows. */
-private class Header(val icon: Int, val label: (Settings) -> Int, val shown: (Settings) -> Boolean) {
-    constructor(label: Int, icon: Int, shown: (Settings) -> Boolean) : this(icon, { label }, shown)
+private class Header(val icon: Int, val label: (Settings) -> Int, val shown: (Settings) -> Boolean, val showIcons: (Settings) -> Boolean) {
+    constructor(label: Int, icon: Int, shown: (Settings) -> Boolean, showIcons: (Settings) -> Boolean) : this(icon, { label }, shown, showIcons)
 }
 
 /**
@@ -57,12 +58,14 @@ private fun valueFrame(
  */
 private fun noRadarFrame(context: Context, config: ViewConfig, density: Float, settings: Settings, header: Header? = null): FieldFrame {
     val text = context.getString(R.string.field_no_radar)
-    if (header == null) {
-        val image = FieldBitmaps.value(text, null, FieldColors.NO_RADAR_GREY, FieldColors.NO_RADAR_GREY, config, density)
-        return FieldViews.value(context, null, image, config.alignment)
-    }
+    val headerRadar = Header(
+        label = R.string.datatype_combo,
+        icon = R.drawable.ic_radar,
+        shown = { true },
+        showIcons = { true }
+    )
     val palette = FieldColors.palette(context, settings.theme)
-    return singleFrame(context, config, density, settings, header.takeIf { it.shown(settings) }, palette, palette.text) { roomH ->
+    return singleFrame(context, config, density, settings, header ?: headerRadar, palette, palette.text) { roomH ->
         FieldBitmaps.value(text, null, FieldColors.NO_RADAR_GREY, FieldColors.NO_RADAR_GREY, config, density, roomH)
     }
 }
@@ -78,7 +81,7 @@ private fun singleFrame(
     context: Context, config: ViewConfig, density: Float, settings: Settings, header: Header?, palette: FieldColors.Palette, iconColor: Int,
     value: (roomH: Int) -> FieldImage
 ): FieldFrame {
-    val top = header?.let { FieldHeader.draw(context, context.getString(it.label(settings)), it.icon, config, density, palette.text, iconColor) }
+    val top = header?.let { FieldHeader.draw(context, context.getString(it.label(settings)), it.icon, config, density, palette.text, iconColor, showIcons = it.showIcons(settings)) }
     // Keep the value clear of the tile's edge and rounded corners: the image is centred, so half of this lands below it.
     val inset = FieldBitmaps.layoutPx(VALUE_VERTICAL_INSET_DP, density)
     val roomH = (config.viewSize.second - (top?.image?.bitmap?.height ?: 0) - inset).coerceAtLeast(1)
@@ -118,6 +121,9 @@ private fun derive(input: FieldDataType.RenderInput, mode: SpeedSetting = SpeedS
     )
 }
 
+internal val ViewConfig.karooWideField: Boolean
+    get() = gridSize.first == 60
+
 /** Vehicles that have passed the rider this ride. */
 class VehicleCountDataType(
     radarExtension: RadarCountExtension
@@ -125,10 +131,15 @@ class VehicleCountDataType(
 
     companion object {
         const val TYPE_ID = "vehicle-count"
-        private val header = Header(R.string.datatype_count, R.drawable.ic_car) { it.countHeader }
 
         /** The field for [input]. Shared with the settings preview, which shows exactly these pixels. */
         fun render(context: Context, input: RenderInput, config: ViewConfig, density: Float): FieldFrame {
+            val header = Header(
+                label = if (config.karooWideField) R.string.datatype_count else R.string.datatype_count_short,
+                icon = R.drawable.ic_car,
+                shown = { it.countHeader },
+                showIcons = { it.showIcons }
+            )
             if (!input.connected) return noRadarFrame(context, config, density, input.settings, header)
             return valueFrame(context, config, density, input.settings, header, input.passCount.toString())
         }
@@ -180,10 +191,16 @@ class ApproachSpeedDataType(
         const val TYPE_ID = "approach-speed"
         // Absolute, the default, is plain VEHICLE SPEED; relative says so in the header.
         private val header = Header(
-            R.drawable.ic_speed,
-            { if (it.speedMode == SpeedSetting.RELATIVE) R.string.header_speed_rel else R.string.datatype_speed }
-        ) { it.speedHeader }
-
+            label = {
+                if (it.speedMode == SpeedSetting.RELATIVE)
+                    R.string.header_speed_rel
+                else
+                    R.string.datatype_speed
+            },
+            icon = R.drawable.ic_speed,
+            shown = { it.speedHeader },
+            showIcons = { it.showIcons }
+        )
         /** The pass whose speed shows at [nowMs] in place of a live one, or null. */
         internal fun held(input: RenderInput, nowMs: Long): TargetTracker.Pass? {
             val d = derive(input, input.settings.speedMode)
@@ -228,8 +245,6 @@ class VehiclesPerHourDataType(
         const val TYPE_ID = "vehicles-per-hour"
         /** Below this much recording time the rate swings wildly, so show nothing. */
         private const val MIN_RIDE_MS = 120_000L
-        private val header = Header(R.string.datatype_rate, R.drawable.ic_car) { it.rateHeader }
-
         internal fun format(passCount: Int, rideTimeMs: Long): String {
             if (rideTimeMs < MIN_RIDE_MS) return "--"
             val perHour = passCount * 3_600_000.0 / rideTimeMs
@@ -238,6 +253,12 @@ class VehiclesPerHourDataType(
 
         /** The field for [input]. Shared with the settings preview, which shows exactly these pixels. */
         fun render(context: Context, input: RenderInput, config: ViewConfig, density: Float): FieldFrame {
+            val header = Header(
+                label = if (config.karooWideField) R.string.datatype_rate else R.string.datatype_rate_short,
+                icon = R.drawable.ic_car,
+                shown = { it.rateHeader },
+                showIcons = { it.showIcons }
+            )
             if (!input.connected) return noRadarFrame(context, config, density, input.settings, header)
             return valueFrame(context, config, density, input.settings, header, format(input.passCount, input.rideTimeMs))
         }
@@ -257,14 +278,19 @@ class ClosestDistanceDataType(
 
     companion object {
         const val TYPE_ID = "closest-distance"
-        private val header = Header(R.string.datatype_distance, R.drawable.ic_vehicle_distance) { it.distanceHeader }
 
         /** The field for [input]. Shared with the settings preview, which shows exactly these pixels. */
         fun render(context: Context, input: RenderInput, config: ViewConfig, density: Float): FieldFrame {
+            val header = Header(
+                label = if (config.karooWideField) R.string.datatype_distance else R.string.datatype_distance_short,
+                icon = R.drawable.ic_vehicle_distance,
+                shown = { it.distanceHeader },
+                showIcons = { it.showIcons }
+            )
             if (!input.connected) return noRadarFrame(context, config, density, input.settings, header)
             return valueFrame(
                 context, config, density, input.settings, header, derive(input).distance ?: "--",
-                layoutSample = Units.distanceLabel(888, input.useImperial)
+                layoutSample = Units.distanceLabel(888, input.useImperial, input.settings.distanceUnits)
             )
         }
     }
@@ -288,7 +314,7 @@ class ComboDataType(
 
     companion object {
         const val TYPE_ID = "radar-combo"
-        private const val ACTIVE_HOLD_MS = 2_000L
+        private const val ACTIVE_HOLD_MS = 3_000L
 
         /** The pass whose speed shows at [nowMs] in place of a live one, or null. */
         internal fun held(input: RenderInput, nowMs: Long): TargetTracker.Pass? {
@@ -321,8 +347,8 @@ class ComboDataType(
                 showsAbsolute = d.showsAbsolute,
                 settings = input.settings,
                 labels = comboLabels(context, input.useImperial),
-                passed = passed
                 passed = passed,
+                karooWideField = config.karooWideField
             )
             val s = input.settings
 
@@ -333,6 +359,8 @@ class ComboDataType(
             val comboIdleStatus = !active && !passed
             val showComboIdle = s.comboIdle == ComboIdleSetting.COUNT
 
+            val image = FieldBitmaps.combo(context, plan, config, density, FieldColors.palette(context, s.theme),
+                header = s.comboHeader, showIcons = s.showIcons, threatLevel = threats, comboIdleStatus = comboIdleStatus, showComboIdle = showComboIdle)
             // Developer aid: tint the whole view so where the host really puts it shows.
             return FieldViews.tile(context, image, tint = if (s.debugFieldBounds) FieldColors.DEBUG_TINT else null,
                 threatLevel = threats, boundsEnabled = config.boundariesEnabled, previewEnabled = config.preview)

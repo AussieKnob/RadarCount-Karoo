@@ -156,6 +156,10 @@ fun GeneralSettingsTab(repository: SettingsRepository) {
                 }
             )
         )
+        ToggleRow(stringResource(R.string.settings_show_icons), settings.showIcons) {
+            save(settings.copy(showIcons = it))
+        }
+        Hint(stringResource(R.string.settings_show_icons_hint))
         ToggleRow(stringResource(R.string.settings_show_threats), settings.showThreats) {
             save(settings.copy(showThreats = it))
         }

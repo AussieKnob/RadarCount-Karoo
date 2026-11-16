@@ -97,12 +97,12 @@ object ComboLayout {
         )
         // Captions off: no line above the digits, so they take the full
         // height. Units then have nowhere to go unless they were glued on.
-        val cap = settings.comboCaptions
+        val vehiclesPassed = if (karooWideField) labels.vehicles else labels.passed
         return when {
             //No vehicles detected, show the "VEHICLES" caption when 'Count only' selected
             !active && settings.comboIdle == ComboIdleSetting.COUNT ->
                 //Captions off: Show nothing, otherwise show the "VEHICLES" caption
-                Plan(listOf(Cell(if (!cap) null else labels.vehicles, countText)),
+                Plan(listOf(Cell(if (!cap) null else vehiclesPassed, countText)),
                     badge = null
                 )
             active && settings.comboActive == ComboActiveSetting.SPEED_DISTANCE ->
@@ -117,7 +117,7 @@ object ComboLayout {
                         else -> listOf(Cell(speedCaption, speedValue), Cell(labels.dist, distValue))
                     },
                     // Display always and numVehicles controls what is displayed
-                    badge = if (!passed && settings.comboBadge) numVehiclesValue else null
+                    badge = if (!passed && settings.comboBadge && karooWideField) numVehiclesValue else null
                 )
             else -> all
         }

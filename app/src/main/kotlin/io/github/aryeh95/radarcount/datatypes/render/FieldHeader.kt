@@ -31,11 +31,11 @@ object FieldHeader {
     /** The Karoo's header band, at least this tall. */
     private const val BAND_DP = 22f
     /** Between the tile edge and the icon or name: the field's 4 dp side padding (2 dp in narrow slots) and the header's own 1 dp. */
-    private const val SIDE_DP = 4f
-    private const val SIDE_NARROW_DP = 2f
-    private const val INSET_DP = 1f
+    const val SIDE_DP = 4f
+    const val SIDE_NARROW_DP = 2f
+    const val INSET_DP = 1f
     /** Before the name, on its start side. */
-    private const val LABEL_MARGIN_DP = 1f
+    const val LABEL_MARGIN_DP = 1f
 
     /**
      * The Karoo's header label size for a tile, in sp, by its grid span. In
@@ -69,47 +69,105 @@ object FieldHeader {
      * left-aligned names with it at the right, centred names centred in the
      * room right of the icon.
      */
-    fun draw(context: Context, label: String, iconRes: Int, config: ViewConfig, density: Float, color: Int, iconColor: Int): HeaderImage {
+    // RADAR INACTIVE icon and other HEADER icons:
+    fun draw(context: Context, label: String, iconRes: Int, config: ViewConfig, density: Float, color: Int, iconColor: Int, showIcons: Boolean): HeaderImage {
         val text = FieldText()
         val upper = label.uppercase()
         val w = config.viewSize.first.coerceAtLeast(1)
         val h = heightPx(config, density, text)
         val karooSp = karooSp(config)
-        // As the Karoo sizes its header: whole px, the icon as tall as the name's size in dp.
-        val side = ((if (config.gridSize.first <= 20) SIDE_NARROW_DP else SIDE_DP) * density).toInt() + layoutPx(INSET_DP, density)
+
+        // The icon is as tall as the header text in dp.
+        val side = ((if (config.gridSize.first <= 20) SIDE_NARROW_DP else SIDE_DP) * density).toInt() +
+                layoutPx(INSET_DP, density)
         val iconPx = (karooSp * density).toInt()
         val gapPx = (max(2, (karooSp * 0.2f).toInt()) * density).toInt()
         val marginPx = layoutPx(LABEL_MARGIN_DP, density)
-        val room = (w - 2 * side - iconPx - gapPx - marginPx).toFloat()
 
-        // The Karoo's size, or just small enough for one line.
+        // Reserve space for the icon only when it is shown.
+        val iconSpace = if (showIcons) iconPx + gapPx else 0
+        val room = (w - 2 * side - iconSpace - marginPx).toFloat()
+
+        // Fit the label onto one line.
         var sizePx = karooSp * density
         val full = text.width(upper, FieldFont.LABEL, sizePx)
         if (room > 0 && full > room) {
             sizePx *= room / full
-            while (sizePx > 1f && text.width(upper, FieldFont.LABEL, sizePx) > room) sizePx -= 0.01f * density
+            while (sizePx > 1f && text.width(upper, FieldFont.LABEL, sizePx) > room) {
+                sizePx -= 0.01f * density
+            }
         }
 
-        val (iconLeft, x, align) = when (config.alignment) {
-            ViewConfig.Alignment.RIGHT -> Triple(side, (w - side).toFloat(), Paint.Align.RIGHT)
-            ViewConfig.Alignment.LEFT -> Triple(w - side - iconPx, (side + marginPx).toFloat(), Paint.Align.LEFT)
-            ViewConfig.Alignment.CENTER -> Triple(side, (side + iconPx + gapPx + marginPx + (w - side)) / 2f, Paint.Align.CENTER)
+        val labelWidth = text.width(upper, FieldFont.LABEL, sizePx)
+        val (x, align, iconLeft) = when (config.alignment) {
+
+            ViewConfig.Alignment.RIGHT -> {
+                val textRight = (w - side).toFloat()
+                val iconPosition =
+                    (textRight - labelWidth - gapPx - iconPx).toInt()
+
+                Triple(textRight, Paint.Align.RIGHT, iconPosition)
+            }
+
+            ViewConfig.Alignment.LEFT -> {
+                val iconPosition = side + marginPx
+                val textLeft = iconPosition +
+                        if (showIcons) iconPx + gapPx else 0
+
+                Triple(textLeft.toFloat(), Paint.Align.LEFT, iconPosition)
+            }
+
+            ViewConfig.Alignment.CENTER -> {
+                val groupWidth = labelWidth +
+                        if (showIcons) (iconPx + gapPx).toFloat() else 0f
+
+                // Centre the icon and label together.
+                val contentLeft = side + marginPx / 2f
+                val contentRight = w - side - marginPx / 2f
+                val groupLeft = contentLeft +
+                        (contentRight - contentLeft - groupWidth) / 2f
+
+                val iconPosition = groupLeft.toInt()
+                val textLeft = groupLeft +
+                        if (showIcons) (iconPx + gapPx).toFloat() else 0f
+
+                Triple(
+                    textLeft + labelWidth / 2f,
+                    Paint.Align.CENTER,
+                    iconPosition
+                )
+            }
         }
-        // Both centred in the band, the name by its line box as a TextView centres it.
+
         val line = text.lineBox(FieldFont.LABEL, sizePx)
         val baseline = (h - (line.descent - line.ascent)) / 2f - line.ascent
         val iconTop = (h - iconPx) / 2
 
         val bitmap = FieldBitmaps.newBitmap(w, h)
         val canvas = Canvas(bitmap)
-        val icon = checkNotNull(context.getDrawable(iconRes)).mutate()
-        icon.setTint(iconColor)
-        icon.setBounds(iconLeft, iconTop, iconLeft + iconPx, iconTop + iconPx)
-        icon.draw(canvas)
-        val name = text.draw(canvas, upper, FieldFont.LABEL, sizePx, x, baseline, align, color)
-        return HeaderImage(FieldImage(bitmap, listOf(Rect(icon.bounds), name)), upper, sizePx / density, karooSp)
+        val bounds = mutableListOf<Rect>()
+
+        if (showIcons) {
+            val icon = checkNotNull(context.getDrawable(iconRes)).mutate()
+            icon.setTint(iconColor)
+            icon.setBounds(iconLeft, iconTop, iconLeft + iconPx, iconTop + iconPx)
+            icon.draw(canvas)
+            bounds.add(Rect(icon.bounds))
+        }
+
+        val name = text.draw(
+            canvas, upper, FieldFont.LABEL, sizePx, x, baseline, align, color
+        )
+        bounds.add(name)
+
+        return HeaderImage(
+            FieldImage(bitmap, bounds),
+            upper,
+            sizePx / density,
+            karooSp
+        )
     }
 
     /** [dp] as Android sizes it in a layout: rounded to whole px. */
-    private fun layoutPx(dp: Float, density: Float): Int = (dp * density + 0.5f).toInt()
+    fun layoutPx(dp: Float, density: Float): Int = (dp * density + 0.5f).toInt()
 }

@@ -27,6 +27,7 @@ internal object SettingsPreferences {
     private val KEY_DISTANCE_UNITS = booleanPreferencesKey("distance_units")
     private val KEY_RATE_HEADER = booleanPreferencesKey("rate_header")
     private val KEY_RESET_ON_RIDE_START = booleanPreferencesKey("reset_on_ride_start")
+    private val KEY_SHOW_ICONS = booleanPreferencesKey("show_icons")
     private val KEY_SHOW_THREATS = booleanPreferencesKey("show_threats")
     private val KEY_COMBO_IDLE = stringPreferencesKey("combo_idle")
     private val KEY_COMBO_ACTIVE = stringPreferencesKey("combo_active")
@@ -62,6 +63,7 @@ internal object SettingsPreferences {
         distanceUnits = p[KEY_DISTANCE_UNITS] ?: true,
         rateHeader = p[KEY_RATE_HEADER] ?: true,
         resetOnRideStart = p[KEY_RESET_ON_RIDE_START] ?: true,
+        showIcons = p[KEY_SHOW_ICONS] ?: true,
         showThreats = p[KEY_SHOW_THREATS] ?: true,
         comboIdle = p[KEY_COMBO_IDLE].enumOr(ComboIdleSetting.COUNT),
         comboActive = p[KEY_COMBO_ACTIVE].enumOr(ComboActiveSetting.SPEED_DISTANCE),
@@ -105,6 +107,7 @@ internal object SettingsPreferences {
         p[KEY_DISTANCE_UNITS] = settings.distanceUnits
         p[KEY_RATE_HEADER] = settings.rateHeader
         p[KEY_RESET_ON_RIDE_START] = settings.resetOnRideStart
+        p[KEY_SHOW_ICONS] = settings.showIcons
         p[KEY_SHOW_THREATS] = settings.showThreats
         p[KEY_COMBO_IDLE] = settings.comboIdle.name
         p[KEY_COMBO_ACTIVE] = settings.comboActive.name
