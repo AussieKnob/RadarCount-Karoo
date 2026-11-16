@@ -88,7 +88,7 @@ private fun StatusLine(status: RadarStatus, imperial: Boolean) {
         RadarStatus.Lost -> stringResource(R.string.status_lost)
         is RadarStatus.Live -> when {
             status.vehicles == 0 -> stringResource(R.string.status_clear)
-            status.nearestM > 0 -> Units.distanceLabel(status.nearestM, imperial)
+            status.nearestM > 0 -> Units.distanceLabel(status.nearestM, imperial, true)
             else -> stringResource(R.string.status_car_behind)
         }
     }
@@ -106,13 +106,13 @@ private fun threatColor(level: Int) = when (level) {
 /** The car behind's closing speed, its road speed under it; dashes while no car is tracked or measured. */
 @Composable
 private fun ApproachStat(closingMps: Double?, riderMps: Double, imperial: Boolean) {
-    val unit = Units.speedUnitLabel(imperial)
+    val unit = Units.speedUnitLabel(imperial, true)
     val closing = closingMps?.let { RadarCountExtension.toUserSpeedUnits(it, imperial) }
     val road = closing?.plus(RadarCountExtension.toUserSpeedUnits(riderMps, imperial))
     Stat(
         label = stringResource(R.string.status_approach, unit),
         value = closing?.toString() ?: "--",
-        footer = road?.let { stringResource(R.string.status_road_speed, it, unit) } ?: ""
+        footer = road?.let { unit } ?: ""
     )
 }
 

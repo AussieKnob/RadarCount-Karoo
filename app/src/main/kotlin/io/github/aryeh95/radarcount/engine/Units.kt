@@ -11,13 +11,23 @@ object Units {
     fun metersToFeet(meters: Int): Int = (meters * FEET_PER_METER).roundToInt()
 
     /** Distance with its unit and no space, as the fields show it: 45m or 148ft. */
-    fun distanceLabel(meters: Int, imperial: Boolean): String =
-        distanceValue(meters, imperial).toString() + if (imperial) "ft" else "m"
+    fun distanceLabel(meters: Int, imperial: Boolean, distanceUnits: Boolean): String =
+        "${distanceValue(meters, imperial)}" + when {
+            !distanceUnits -> ""
+            imperial -> "ft"
+            else -> "m"
+        }
 
-    fun speedUnitLabel(useImperial: Boolean): String = if (useImperial) "mph" else "km/h"
+    /** Speed with its unit and no space, as the fields show it: 123km/h or 123mph. */
+    fun speedUnitLabel(useImperial: Boolean, speedUnits: Boolean): String =
+        when {
+            !speedUnits -> ""
+            useImperial -> "mph"
+            else -> "km/h"
+        }
 
-    /** Unit as a field caption: MPH or KPH. */
-    fun speedUnitCaption(useImperial: Boolean): String = if (useImperial) "MPH" else "KPH"
+    /** Unit as a field caption: MPH or KM/H. */
+    fun speedUnitCaption(useImperial: Boolean): String = if (useImperial) "MPH" else "KM/H"
 
     /** Unit as a field caption: FT or M. */
     fun distanceUnitCaption(useImperial: Boolean): String = if (useImperial) "FT" else "M"

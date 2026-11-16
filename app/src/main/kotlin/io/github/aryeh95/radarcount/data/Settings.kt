@@ -48,7 +48,9 @@ data class Settings(
     val countHeader: Boolean = true,
     val vehiclesHeader: Boolean = true,
     val speedHeader: Boolean = true,
+    val speedUnits: Boolean = true,
     val distanceHeader: Boolean = true,
+    val distanceUnits: Boolean = true,
     val rateHeader: Boolean = true,
     /** Reset the ride count when a ride starts recording. */
     val resetOnRideStart: Boolean = true,

@@ -30,7 +30,7 @@ object ComboLayout {
         /** Distance unit as a caption, e.g. FT or M. */
         val distUnit: String,
         /** The caption of a held pass speed. */
-        val passed: String = "PASSED"
+        val passed: String,
     )
 
     /**
@@ -61,7 +61,8 @@ object ComboLayout {
         settings: Settings,
         labels: Labels,
         /** [speed] is a passed car's held speed, not a live one. */
-        passed: Boolean = false
+        passed: Boolean = false,
+        karooWideField: Boolean
     ): Plan {
         val countText = count.toString()
         val numVehiclesValue = if (numVehicles > 0) numVehicles.toString() else "--"
@@ -70,18 +71,27 @@ object ComboLayout {
         val unitsInCaptions = settings.comboUnitsInCaptions
         val speedValue = if (unitsInCaptions || speed == null) speedDigits else speedDigits + labels.speedUnit.lowercase()
         val distValue = if (unitsInCaptions || distance == null) distDigits else distDigits + labels.distUnit.lowercase()
+        val speedValue = if (unitsInCaptions || speed == null) speedDigits else speedDigits + if (settings.speedUnits) labels.speedUnit.lowercase() else ""
+        val distValue = if (unitsInCaptions || distance == null) distDigits else distDigits + if (settings.distanceUnits) labels.distUnit.lowercase() else ""
         val speedCaption = if (showsAbsolute) labels.speedAbs else labels.speedRel
+
+        val cap = settings.comboCaptions
+        val countCaption = if (!cap) null else if (passed) labels.count else if (active) labels.number else labels.count
 
         // A held pass speed: dimmed, and captioned PASSED (PASSED KPH with
         // units as captions) even where captions are off, since grey alone
         // may not read in sunlight.
-        val passedCaption = if (unitsInCaptions) "${labels.passed} ${labels.speedUnit}" else labels.passed
+        val passedCaption = if (!cap) null else if (unitsInCaptions) "${labels.passed} ${labels.speedUnit}" else labels.passed
+
+        // Display all three captions
         val all = Plan(
             cells = listOf(
-                Cell(labels.count, countText),
+                Cell(countCaption, if(passed || !active) countText else numVehiclesValue),
+
+                // This should show the PASSED value and set dimmed
                 if (passed) Cell(passedCaption, speedValue, dim = true)
-                else Cell(if (unitsInCaptions) shortSpeedCaption(showsAbsolute, labels) else speedCaption, speedValue),
-                Cell(if (unitsInCaptions) labels.distUnit else labels.dist, distValue)
+                else Cell(if (!cap) null else if (unitsInCaptions) shortSpeedCaption(showsAbsolute, labels) else speedCaption, speedValue),
+                Cell(if (!cap) null else if (unitsInCaptions) labels.distUnit else labels.dist, distValue)
             ),
             badge = null
         )
@@ -89,20 +99,25 @@ object ComboLayout {
         // height. Units then have nowhere to go unless they were glued on.
         val cap = settings.comboCaptions
         return when {
+            //No vehicles detected, show the "VEHICLES" caption when 'Count only' selected
             !active && settings.comboIdle == ComboIdleSetting.COUNT ->
-                Plan(listOf(Cell(if (cap) labels.vehicles else null, countText)), badge = null)
+                //Captions off: Show nothing, otherwise show the "VEHICLES" caption
+                Plan(listOf(Cell(if (!cap) null else labels.vehicles, countText)),
+                    badge = null
+                )
             active && settings.comboActive == ComboActiveSetting.SPEED_DISTANCE ->
                 Plan(
                     cells = when {
                         passed -> listOf(
                             Cell(passedCaption, speedValue, dim = true),
-                            Cell(if (!cap) null else if (unitsInCaptions) labels.distUnit else labels.dist, distValue)
+                            Cell(if (!cap) null else if (unitsInCaptions) labels.distUnit else labels.dist, distValue, dim = true)
                         )
                         !cap -> listOf(Cell(null, speedValue), Cell(null, distValue))
                         unitsInCaptions -> listOf(Cell(labels.speedUnit, speedValue), Cell(labels.distUnit, distValue))
                         else -> listOf(Cell(speedCaption, speedValue), Cell(labels.dist, distValue))
                     },
-                    badge = if (settings.comboBadge) countText else null
+                    // Display always and numVehicles controls what is displayed
+                    badge = if (!passed && settings.comboBadge) numVehiclesValue else null
                 )
             else -> all
         }
@@ -125,7 +140,7 @@ object ComboLayout {
     /** Clear space kept above and below the glyphs inside the area under the header. */
     private const val MARGIN_DP = 2f
     /** Between the badge and the first cell. */
-    private const val BADGE_GAP_DP = 4f
+    private const val BADGE_GAP_DP = 10f
     /** Between a caption's baseline and the top of the digits under it, as a fraction of the drawn value size. */
     private const val CAPTION_GAP = 0.25f
 
@@ -214,9 +229,14 @@ object ComboLayout {
         val texts = mutableListOf<Placed>()
         var x = 0f
         if (plan.badge != null) {
-            // Sits on the digit row, not the caption row.
+            /** Move the badge to the center of the digit row for aesthetics */
+            //val badgeOffset = (badgePx - valuePx) / 2f
+            val valueInk = m.ink(plan.cells.first().value, FieldFont.VALUE, valuePx)
+            val badgeInk = m.ink(plan.badge, FieldFont.VALUE, badgePx)
+            val badgeOffset = ((valueInk.top + valueInk.bottom) - (badgeInk.top + badgeInk.bottom)) / 2f
+            /** Sits on the digit row, not the caption row. */
             val w = m.width(plan.badge, FieldFont.VALUE, badgePx)
-            texts += Placed(plan.badge, FieldFont.VALUE, badgePx, x + w / 2, 0f)
+            texts += Placed(plan.badge, FieldFont.VALUE, badgePx, x + w / 2, badgeOffset)
             x += w + BADGE_GAP_DP * density
         }
         plan.cells.forEachIndexed { i, c ->

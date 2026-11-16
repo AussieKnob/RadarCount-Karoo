@@ -17,7 +17,7 @@ class UnitsTest {
 
     @Test
     fun distanceLabel() {
-        assertThat(Units.distanceLabel(45, imperial = false)).isEqualTo("45m")
-        assertThat(Units.distanceLabel(45, imperial = true)).isEqualTo("148ft")
+        assertThat(Units.distanceLabel(45, imperial = false, true)).isEqualTo("45m")
+        assertThat(Units.distanceLabel(45, imperial = true, true)).isEqualTo("148ft")
     }
 }

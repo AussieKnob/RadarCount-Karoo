@@ -22,7 +22,9 @@ internal object SettingsPreferences {
     private val KEY_COUNT_HEADER = booleanPreferencesKey("count_header")
     private val KEY_VEHICLES_HEADER = booleanPreferencesKey("vehicles_header")
     private val KEY_SPEED_HEADER = booleanPreferencesKey("speed_header")
+    private val KEY_SPEED_UNITS = booleanPreferencesKey("speed_units")
     private val KEY_DISTANCE_HEADER = booleanPreferencesKey("distance_header")
+    private val KEY_DISTANCE_UNITS = booleanPreferencesKey("distance_units")
     private val KEY_RATE_HEADER = booleanPreferencesKey("rate_header")
     private val KEY_RESET_ON_RIDE_START = booleanPreferencesKey("reset_on_ride_start")
     private val KEY_COMBO_IDLE = stringPreferencesKey("combo_idle")
@@ -54,7 +56,9 @@ internal object SettingsPreferences {
         countHeader = p[KEY_COUNT_HEADER] ?: true,
         vehiclesHeader = p[KEY_VEHICLES_HEADER] ?: true,
         speedHeader = p[KEY_SPEED_HEADER] ?: true,
+        speedUnits = p[KEY_SPEED_UNITS] ?: true,
         distanceHeader = p[KEY_DISTANCE_HEADER] ?: true,
+        distanceUnits = p[KEY_DISTANCE_UNITS] ?: true,
         rateHeader = p[KEY_RATE_HEADER] ?: true,
         resetOnRideStart = p[KEY_RESET_ON_RIDE_START] ?: true,
         comboIdle = p[KEY_COMBO_IDLE].enumOr(ComboIdleSetting.COUNT),
@@ -94,7 +98,9 @@ internal object SettingsPreferences {
         p[KEY_COUNT_HEADER] = settings.countHeader
         p[KEY_VEHICLES_HEADER] = settings.vehiclesHeader
         p[KEY_SPEED_HEADER] = settings.speedHeader
+        p[KEY_SPEED_UNITS] = settings.speedUnits
         p[KEY_DISTANCE_HEADER] = settings.distanceHeader
+        p[KEY_DISTANCE_UNITS] = settings.distanceUnits
         p[KEY_RATE_HEADER] = settings.rateHeader
         p[KEY_RESET_ON_RIDE_START] = settings.resetOnRideStart
         p[KEY_COMBO_IDLE] = settings.comboIdle.name

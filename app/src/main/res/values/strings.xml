@@ -65,6 +65,8 @@
     <string name="settings_pass_hold_hint">After a car passes, keep its approach speed on screen, greyed and marked PASSED, for this long. A car whose speed is measured replaces it at once. Cars seen for under 2s have no speed, and none is shown.</string>
     <string name="settings_field_header">Header label</string>
     <string name="settings_field_header_hint">Toggles the data field\'s icon and name displayed at the top.</string>
+    <string name="settings_field_units">Units</string>
+    <string name="settings_field_units_hint">Toggles the data field\'s unit value.</string>
     <string name="settings_sensitivity">Count sensitivity</string>
     <string name="settings_sensitivity_strict">Strict</string>
     <string name="settings_sensitivity_normal">Normal</string>

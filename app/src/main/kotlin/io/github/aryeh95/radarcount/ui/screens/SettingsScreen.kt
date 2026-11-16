@@ -264,12 +264,14 @@ fun FieldsTab(repository: SettingsRepository, extension: RadarCountExtension?) {
             SpeedModeDropdown(settings.speedMode) { save(settings.copy(speedMode = it)) }
             Hint(stringResource(R.string.settings_speed_hint))
             HeaderToggle(settings.speedHeader) { save(settings.copy(speedHeader = it)) }
+            UnitsToggle(settings.speedUnits) { save(settings.copy(speedUnits = it)) }
             PassHoldDropdown(settings.speedPassHold) { save(settings.copy(speedPassHold = it)) }
         }
 
         FieldCard(R.string.datatype_distance, R.string.datatype_distance_desc, R.drawable.ic_vehicle_distance, open == ClosestDistanceDataType.TYPE_ID, { toggle(ClosestDistanceDataType.TYPE_ID) }) {
             FieldPreviews(ClosestDistanceDataType.TYPE_ID, config(ClosestDistanceDataType.TYPE_ID), settings, listOf(null to approaching))
             HeaderToggle(settings.distanceHeader) { save(settings.copy(distanceHeader = it)) }
+            UnitsToggle(settings.distanceUnits) { save(settings.copy(distanceUnits = it)) }
         }
 
         FieldCard(R.string.datatype_rate, R.string.datatype_rate_desc, R.drawable.ic_car, open == VehiclesPerHourDataType.TYPE_ID, { toggle(VehiclesPerHourDataType.TYPE_ID) }) {
@@ -292,6 +294,13 @@ private val PREVIEW_PASS = FieldDataType.previewPass(seq = 1, atMs = PREVIEW_NOW
 private fun HeaderToggle(checked: Boolean, onChange: (Boolean) -> Unit) {
     ToggleRow(stringResource(R.string.settings_field_header), checked, onChange)
     Hint(stringResource(R.string.settings_field_header_hint))
+}
+
+/** The single fields' units on or off. */
+@Composable
+private fun UnitsToggle(checked: Boolean, onChange: (Boolean) -> Unit) {
+    ToggleRow(stringResource(R.string.settings_field_units), checked, onChange)
+    Hint(stringResource(R.string.settings_field_units_hint))
 }
 
 /** Absolute (road) or relative (closing) speed, for one field. */

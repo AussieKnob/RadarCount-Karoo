@@ -104,10 +104,10 @@ private fun derive(input: FieldDataType.RenderInput, mode: SpeedSetting = SpeedS
     val absolute = relative?.plus(
         RadarCountExtension.toUserSpeedUnits(input.riderSpeedMps, input.useImperial)
     )
-    val distance = traffic?.nearestM?.takeIf { it > 0 }?.let { Units.distanceLabel(it, input.useImperial) }
+    val distance = traffic?.nearestM?.takeIf { it > 0 }?.let { Units.distanceLabel(it, input.useImperial, input.settings.distanceUnits) }
     val showsAbsolute = mode == SpeedSetting.ABSOLUTE
     return Derived(
-        tracked, relative, absolute, Units.speedUnitLabel(input.useImperial), distance, traffic?.vehicles ?: 0,
+        tracked, relative, absolute, Units.speedUnitLabel(input.useImperial, input.settings.speedUnits), distance, traffic?.vehicles ?: 0,
         shownSpeed = if (showsAbsolute) absolute else relative,
         showsAbsolute = showsAbsolute
     )
@@ -317,9 +317,15 @@ class ComboDataType(
                 settings = input.settings,
                 labels = comboLabels(context, input.useImperial),
                 passed = passed
+                passed = passed,
             )
             val s = input.settings
             val image = FieldBitmaps.combo(context, plan, config, density, FieldColors.palette(context, s.theme), header = s.comboHeader)
+
+            // comboIdle when no vehicle in radar and not passed irrespective  of ComboIdleSetting setting
+            val comboIdleStatus = !active && !passed
+            val showComboIdle = s.comboIdle == ComboIdleSetting.COUNT
+
             // Developer aid: tint the whole view so where the host really puts it shows.
             return FieldViews.tile(context, image, tint = if (s.debugFieldBounds) FieldColors.DEBUG_TINT else null)
         }
