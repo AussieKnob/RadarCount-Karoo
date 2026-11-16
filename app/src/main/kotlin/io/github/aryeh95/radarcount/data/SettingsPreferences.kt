@@ -20,6 +20,7 @@ internal object SettingsPreferences {
     private val KEY_COMBO_SPEED_MODE = stringPreferencesKey("combo_speed_mode")
     private val KEY_SPEED_PASS_HOLD = stringPreferencesKey("speed_pass_hold")
     private val KEY_COUNT_HEADER = booleanPreferencesKey("count_header")
+    private val KEY_VEHICLES_HEADER = booleanPreferencesKey("vehicles_header")
     private val KEY_SPEED_HEADER = booleanPreferencesKey("speed_header")
     private val KEY_DISTANCE_HEADER = booleanPreferencesKey("distance_header")
     private val KEY_RATE_HEADER = booleanPreferencesKey("rate_header")
@@ -51,6 +52,7 @@ internal object SettingsPreferences {
         comboSpeedMode = (p[KEY_COMBO_SPEED_MODE] ?: p[KEY_LEGACY_SPEED]).enumOr(SpeedSetting.ABSOLUTE),
         speedPassHold = p[KEY_SPEED_PASS_HOLD].enumOr(PassHoldSetting.OFF),
         countHeader = p[KEY_COUNT_HEADER] ?: true,
+        vehiclesHeader = p[KEY_VEHICLES_HEADER] ?: true,
         speedHeader = p[KEY_SPEED_HEADER] ?: true,
         distanceHeader = p[KEY_DISTANCE_HEADER] ?: true,
         rateHeader = p[KEY_RATE_HEADER] ?: true,
@@ -90,6 +92,7 @@ internal object SettingsPreferences {
         p.remove(KEY_LEGACY_SPEED)
         p[KEY_SPEED_PASS_HOLD] = settings.speedPassHold.name
         p[KEY_COUNT_HEADER] = settings.countHeader
+        p[KEY_VEHICLES_HEADER] = settings.vehiclesHeader
         p[KEY_SPEED_HEADER] = settings.speedHeader
         p[KEY_DISTANCE_HEADER] = settings.distanceHeader
         p[KEY_RATE_HEADER] = settings.rateHeader

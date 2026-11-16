@@ -18,7 +18,7 @@ class ComboLayoutTest {
     @Test
     @DisplayName("idle with count-only shows one captioned count")
     fun idleCountOnly() {
-        val p = ComboLayout.plan(active = false, count = 12, speed = null, distance = null, showsAbsolute = false, settings = Settings(), labels = labels)
+        val p = ComboLayout.plan(active = false, count = 12, numVehicles = 2, speed = null, distance = null, showsAbsolute = false, settings = Settings(), labels = labels)
         assertThat(p.cells).containsExactly(ComboLayout.Cell("VEHICLES", "12"))
         assertThat(p.badge).isNull()
     }
@@ -26,7 +26,7 @@ class ComboLayoutTest {
     @Test
     @DisplayName("active with speed and distance puts units as captions and the count in the badge")
     fun activeSpeedDistance() {
-        val p = ComboLayout.plan(active = true, count = 12, speed = 34, distance = 148, showsAbsolute = true, settings = Settings(), labels = labels)
+        val p = ComboLayout.plan(active = true, count = 12, numVehicles = 2, speed = 34, distance = 148, showsAbsolute = true, settings = Settings(), labels = labels)
         assertThat(p.cells).containsExactly(
             ComboLayout.Cell("MPH", "34"),
             ComboLayout.Cell("FT", "148")
@@ -37,7 +37,7 @@ class ComboLayoutTest {
     @Test
     @DisplayName("unknown speed shows a dash without a unit glued to it")
     fun unknownSpeed() {
-        val p = ComboLayout.plan(true, 12, null, 28, false, Settings(comboUnitsInCaptions = false), labels)
+        val p = ComboLayout.plan(true, 12, 2, null, 28, false, Settings(comboUnitsInCaptions = false), labels)
         assertThat(p.cells[0].value).isEqualTo("--")
         assertThat(p.cells[1].value).isEqualTo("28ft")
     }
@@ -45,8 +45,8 @@ class ComboLayoutTest {
     @Test
     @DisplayName("two big values in a half-width field come out much larger than three captioned cells")
     fun sizesTwoCellsBeatThree() {
-        val two = ComboLayout.plan(true, 12, 34, 148, true, Settings(), labels)
-        val three = ComboLayout.plan(true, 12, 34, 148, true, Settings(comboActive = ComboActiveSetting.ALL, comboUnitsInCaptions = false), labels)
+        val two = ComboLayout.plan(true, 12, 2, 34, 148, true, Settings(), labels)
+        val three = ComboLayout.plan(true, 12, 2, 34, 148, true, Settings(comboActive = ComboActiveSetting.ALL, comboUnitsInCaptions = false), labels)
         val a = ComboLayout.sizes(two, widthPx = 238, heightPx = 126, textSizeSp = 46, density = 1.875f, wideGrid = false)
         val b = ComboLayout.sizes(three, widthPx = 238, heightPx = 126, textSizeSp = 46, density = 1.875f, wideGrid = false)
         assertThat(a.valueSp).isAtLeast(28)
@@ -56,7 +56,7 @@ class ComboLayoutTest {
     @Test
     @DisplayName("a short field caps the digits so caption and digits fit its height")
     fun sizesRespectHeight() {
-        val two = ComboLayout.plan(true, 12, 34, 148, true, Settings(), labels)
+        val two = ComboLayout.plan(true, 12, 2, 34, 148, true, Settings(), labels)
         // The Karoo 3 half-width tile: 238x126 px at density 1.875, text 46 sp.
         val s = ComboLayout.sizes(two, widthPx = 238, heightPx = 126, textSizeSp = 46, density = 1.875f, wideGrid = false)
         // Width-bound here: 238 px less 2 dp each side over the badge, two cells and their gaps.
@@ -82,7 +82,7 @@ class ComboLayoutTest {
         // Karoo 2 and Karoo 3 half width, and the full-width tile.
         val tiles = listOf(Triple(238, 148, 50), Triple(238, 126, 46), Triple(478, 160, 69))
         for (s in variants) for (active in listOf(false, true)) for ((w, h, text) in tiles) {
-            val p = ComboLayout.plan(active, 48, if (active) 45 else null, if (active) 571 else null, false, s, labels)
+            val p = ComboLayout.plan(active, 48, 2, if (active) 45 else null, if (active) 571 else null, false, s, labels)
             val headerDp = if (s.comboHeader) ComboLayout.HEADER_DP else 0f
             val a = ComboLayout.arrange(p, w, h, text, 1.875f, wideGrid = w > 300, headerDp = headerDp)
             assertThat(a.fits).isTrue()
@@ -122,8 +122,8 @@ class ComboLayoutTest {
         val tiles = listOf(Triple(238, 148, 50), Triple(238, 126, 46), Triple(478, 160, 69))
         for ((w, h, text) in tiles) {
             for (s in listOf(Settings(), Settings(comboCaptions = false))) {
-                val known = ComboLayout.arrange(ComboLayout.plan(true, 48, 45, 571, false, s, labels), w, h, text, 1.875f, w > 300, measurer = InkyText)
-                val unknown = ComboLayout.arrange(ComboLayout.plan(true, 48, null, 571, false, s, labels), w, h, text, 1.875f, w > 300, measurer = InkyText)
+                val known = ComboLayout.arrange(ComboLayout.plan(true, 48, 2, 45, 571, false, s, labels), w, h, text, 1.875f, w > 300, measurer = InkyText)
+                val unknown = ComboLayout.arrange(ComboLayout.plan(true, 48, 2, null, 571, false, s, labels), w, h, text, 1.875f, w > 300, measurer = InkyText)
                 assertThat(unknown.sizes).isEqualTo(known.sizes)
                 assertThat(unknown.texts.single { it.text == "--" }.baseline).isEqualTo(known.texts.single { it.text == "45" }.baseline)
             }
@@ -134,7 +134,7 @@ class ComboLayoutTest {
                 Settings(comboIdle = ComboIdleSetting.ALL, comboActive = ComboActiveSetting.ALL, comboUnitsInCaptions = false)
             )
             for (s in variants) for (active in listOf(false, true)) {
-                val p = ComboLayout.plan(active, 48, if (active) 45 else null, if (active) 571 else null, false, s, labels)
+                val p = ComboLayout.plan(active, 48, 2, if (active) 45 else null, if (active) 571 else null, false, s, labels)
                 val headerDp = if (s.comboHeader) ComboLayout.HEADER_DP else 0f
                 val a = ComboLayout.arrange(p, w, h, text, 1.875f, wideGrid = w > 300, headerDp = headerDp, measurer = InkyText)
                 assertThat(a.fits).isTrue()
@@ -154,8 +154,8 @@ class ComboLayoutTest {
     @DisplayName("a glued unit that descends lifts the digits to make room instead of shrinking them")
     fun descenderLiftsDigits() {
         val s = Settings(comboUnitsInCaptions = false, comboBadge = false)
-        val known = ComboLayout.arrange(ComboLayout.plan(true, 48, 45, 571, false, s, labels.copy(speedUnit = "KMH")), 478, 160, 69, 1.875f, true)
-        val glued = ComboLayout.arrange(ComboLayout.plan(true, 48, 45, 571, false, s, labels), 478, 160, 69, 1.875f, true)
+        val known = ComboLayout.arrange(ComboLayout.plan(true, 48, 2, 45, 571, false, s, labels.copy(speedUnit = "KMH")), 478, 160, 69, 1.875f, true)
+        val glued = ComboLayout.arrange(ComboLayout.plan(true, 48, 2, 45, 571, false, s, labels), 478, 160, 69, 1.875f, true)
         // "45kmh" and "45mph" are the same width; only the p descends.
         assertThat(glued.sizes).isEqualTo(known.sizes)
         val kph = known.texts.last { it.font == FieldFont.VALUE }.baseline
@@ -167,7 +167,7 @@ class ComboLayoutTest {
     @DisplayName("all-three layout with units in captions shortens the speed caption to mode plus unit")
     fun allThreeUnitsInCaptions() {
         val s = Settings(comboIdle = ComboIdleSetting.ALL, comboActive = ComboActiveSetting.ALL)
-        val p = ComboLayout.plan(true, 12, 34, 148, showsAbsolute = false, settings = s, labels = labels)
+        val p = ComboLayout.plan(true, 12, numVehicles = 2, 34, 148, showsAbsolute = false, settings = s, labels = labels)
         assertThat(p.cells.map { it.caption }).containsExactly("COUNT", "REL MPH", "FT").inOrder()
         assertThat(p.cells.map { it.value }).containsExactly("12", "34", "148").inOrder()
         assertThat(p.badge).isNull()
@@ -177,11 +177,11 @@ class ComboLayoutTest {
     @DisplayName("captions off drops the caption line and lets the digits grow")
     fun captionsOff() {
         val s = Settings(comboCaptions = false)
-        val idle = ComboLayout.plan(false, 12, null, null, false, s, labels)
+        val idle = ComboLayout.plan(false, 12, 2, null, null, false, s, labels)
         assertThat(idle.cells).containsExactly(ComboLayout.Cell(null, "12"))
-        val active = ComboLayout.plan(true, 12, 34, 148, false, s, labels)
+        val active = ComboLayout.plan(true, 12, 2, 34, 148, false, s, labels)
         assertThat(active.cells.map { it.caption }).containsExactly(null, null)
-        val withCap = ComboLayout.sizes(ComboLayout.plan(true, 12, 34, 148, false, Settings(), labels), 478, 160, 69, 1.875f, true)
+        val withCap = ComboLayout.sizes(ComboLayout.plan(true, 12, 2, 34, 148, false, Settings(), labels), 478, 160, 69, 1.875f, true)
         val noCap = ComboLayout.sizes(active, 478, 160, 69, 1.875f, true)
         assertThat(noCap.valueSp).isGreaterThan(withCap.valueSp)
     }
@@ -190,7 +190,7 @@ class ComboLayoutTest {
     @DisplayName("badge can be turned off; units-after-digits keeps the old captions")
     fun noBadgeOldUnits() {
         val s = Settings(comboBadge = false, comboUnitsInCaptions = false)
-        val p = ComboLayout.plan(true, 12, 34, 148, showsAbsolute = true, settings = s, labels = labels)
+        val p = ComboLayout.plan(true, 12, 2, 34, 148, showsAbsolute = true, settings = s, labels = labels)
         assertThat(p.badge).isNull()
         assertThat(p.cells).containsExactly(
             ComboLayout.Cell("ABS SPEED", "34mph"),
@@ -201,7 +201,7 @@ class ComboLayoutTest {
     @Test
     @DisplayName("a held pass speed is dimmed and captioned PASSED with its unit; distance and badge stay live")
     fun passedSpeedDistance() {
-        val p = ComboLayout.plan(true, 12, 34, 148, false, Settings(), labels, passed = true)
+        val p = ComboLayout.plan(true, 12, 2, 34, 148, false, Settings(), labels, passed = true)
         assertThat(p.cells).containsExactly(
             ComboLayout.Cell("PASSED MPH", "34", dim = true),
             ComboLayout.Cell("FT", "148")
@@ -212,7 +212,7 @@ class ComboLayoutTest {
     @Test
     @DisplayName("a held pass speed with units glued on is captioned PASSED")
     fun passedGlued() {
-        val p = ComboLayout.plan(true, 12, 34, 148, true, Settings(comboUnitsInCaptions = false), labels, passed = true)
+        val p = ComboLayout.plan(true, 12, 2, 34, 148, true, Settings(comboUnitsInCaptions = false), labels, passed = true)
         assertThat(p.cells).containsExactly(
             ComboLayout.Cell("PASSED", "34mph", dim = true),
             ComboLayout.Cell("DIST", "148ft")
@@ -222,12 +222,12 @@ class ComboLayoutTest {
     @Test
     @DisplayName("captions off still caption a held pass speed PASSED, and only that cell")
     fun passedCaptionsOff() {
-        val p = ComboLayout.plan(true, 12, 34, null, false, Settings(comboCaptions = false), labels, passed = true)
+        val p = ComboLayout.plan(true, 12, 2, 34, null, false, Settings(comboCaptions = false), labels, passed = true)
         assertThat(p.cells).containsExactly(
             ComboLayout.Cell("PASSED MPH", "34", dim = true),
             ComboLayout.Cell(null, "--")
         ).inOrder()
-        val glued = ComboLayout.plan(true, 12, 34, null, false, Settings(comboCaptions = false, comboUnitsInCaptions = false), labels, passed = true)
+        val glued = ComboLayout.plan(true, 12, 2, 34, null, false, Settings(comboCaptions = false, comboUnitsInCaptions = false), labels, passed = true)
         assertThat(glued.cells[0]).isEqualTo(ComboLayout.Cell("PASSED", "34mph", dim = true))
     }
 
@@ -235,13 +235,13 @@ class ComboLayoutTest {
     @DisplayName("all three with a held pass speed: count and distance live, the distance never held")
     fun passedAll() {
         val s = Settings(comboIdle = ComboIdleSetting.ALL, comboActive = ComboActiveSetting.ALL)
-        val clear = ComboLayout.plan(true, 13, 34, null, false, s, labels, passed = true)
+        val clear = ComboLayout.plan(true, 13, 2, 34, null, false, s, labels, passed = true)
         assertThat(clear.cells).containsExactly(
             ComboLayout.Cell("COUNT", "13"),
             ComboLayout.Cell("PASSED MPH", "34", dim = true),
             ComboLayout.Cell("FT", "--")
         ).inOrder()
-        val nextCar = ComboLayout.plan(true, 13, 34, 197, false, s, labels, passed = true)
+        val nextCar = ComboLayout.plan(true, 13, 2, 34, 197, false, s, labels, passed = true)
         assertThat(nextCar.cells[2]).isEqualTo(ComboLayout.Cell("FT", "197"))
         assertThat(nextCar.cells.count { it.dim }).isEqualTo(1)
     }
@@ -296,8 +296,8 @@ class ComboLayoutTest {
         for (s in allSettings()) for (active in listOf(false, true)) for (speed in listOf(null, 34, 144))
             for (distance in listOf(null, 148)) for (abs in listOf(false, true)) {
                 val before = planBeforePassHold(active, 48, speed, distance, abs, s, labels)
-                assertThat(ComboLayout.plan(active, 48, speed, distance, abs, s, labels, passed = false)).isEqualTo(before)
-                assertThat(ComboLayout.plan(active, 48, speed, distance, abs, s, labels)).isEqualTo(before)
+                assertThat(ComboLayout.plan(active, 48, 2 ,speed, distance, abs, s, labels, passed = false)).isEqualTo(before)
+                assertThat(ComboLayout.plan(active, 48, 2, speed, distance, abs, s, labels)).isEqualTo(before)
             }
     }
 
@@ -310,7 +310,7 @@ class ComboLayoutTest {
         val units = listOf(Pair("KPH", 144), Pair("MPH", 123))
         for (s in allSettings()) for ((w, h, text) in tiles) for (distance in listOf(null, 571)) for (m in listOf(EstimatedText, InkyText))
             for ((unit, speed) in units) {
-                val p = ComboLayout.plan(true, 148, speed, distance, false, s, labels.copy(speedUnit = unit), passed = true)
+                val p = ComboLayout.plan(true, 148, 2, speed, distance, false, s, labels.copy(speedUnit = unit), passed = true)
                 assertThat(p.cells.any { it.dim && it.caption!!.startsWith("PASSED") }).isTrue()
                 val headerDp = if (s.comboHeader) ComboLayout.HEADER_DP else 0f
                 val a = ComboLayout.arrange(p, w, h, text, 1.875f, wideGrid = w > 300, headerDp = headerDp, measurer = m)

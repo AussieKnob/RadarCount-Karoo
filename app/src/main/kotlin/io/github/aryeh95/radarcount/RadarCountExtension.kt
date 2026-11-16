@@ -8,6 +8,7 @@ import io.github.aryeh95.radarcount.data.UnitsSetting
 import io.github.aryeh95.radarcount.datatypes.ApproachSpeedDataType
 import io.github.aryeh95.radarcount.datatypes.ClosestDistanceDataType
 import io.github.aryeh95.radarcount.datatypes.ComboDataType
+import io.github.aryeh95.radarcount.datatypes.NumberVehiclesDataType
 import io.github.aryeh95.radarcount.datatypes.VehicleCountDataType
 import io.github.aryeh95.radarcount.datatypes.VehiclesPerHourDataType
 import io.github.aryeh95.radarcount.engine.FitRecordWriter
@@ -529,6 +530,7 @@ class RadarCountExtension : KarooExtension(EXTENSION_ID, BuildConfig.VERSION_NAM
         listOf(
             ComboDataType(this),
             VehicleCountDataType(this),
+            NumberVehiclesDataType(this),
             ApproachSpeedDataType(this),
             ClosestDistanceDataType(this),
             VehiclesPerHourDataType(this)

@@ -21,6 +21,7 @@ object ComboLayout {
     data class Labels(
         val count: String,
         val vehicles: String,
+        val number: String,
         val speedRel: String,
         val speedAbs: String,
         val dist: String,
@@ -51,6 +52,7 @@ object ComboLayout {
     fun plan(
         active: Boolean,
         count: Int,
+        numVehicles: Int,
         /** Speed digits without unit, or null while unknown. */
         speed: Int?,
         /** Distance digits without unit, or null while there is no target. */
@@ -62,6 +64,7 @@ object ComboLayout {
         passed: Boolean = false
     ): Plan {
         val countText = count.toString()
+        val numVehiclesValue = if (numVehicles > 0) numVehicles.toString() else "--"
         val speedDigits = speed?.toString() ?: "--"
         val distDigits = distance?.toString() ?: "--"
         val unitsInCaptions = settings.comboUnitsInCaptions

@@ -5,6 +5,8 @@
 
     <string name="datatype_count">Vehicles</string>
     <string name="datatype_count_desc">Vehicles passed this ride</string>
+    <string name="datatype_number">Vehicles</string>
+    <string name="datatype_number_desc">Number of vehicles approaching</string>
     <string name="datatype_speed">Vehicle Speed</string>
     <string name="datatype_speed_desc">Relative and absolute speed of nearest vehicle</string>
     <string name="datatype_distance">Vehicle Distance</string>

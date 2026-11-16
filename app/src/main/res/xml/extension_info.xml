@@ -21,6 +21,13 @@
         icon="@drawable/ic_car" />
 
     <DataType
+        typeId="vehicle-number"
+        description="@string/datatype_number_desc"
+        displayName="@string/datatype_number"
+        graphical="true"
+        icon="@drawable/ic_car" />
+
+    <DataType
         typeId="approach-speed"
         description="@string/datatype_speed_desc"
         displayName="@string/datatype_speed"

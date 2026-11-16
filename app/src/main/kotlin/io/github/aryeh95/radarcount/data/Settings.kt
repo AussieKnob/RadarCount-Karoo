@@ -46,6 +46,7 @@ data class Settings(
     val speedPassHold: PassHoldSetting = PassHoldSetting.OFF,
     /** The single fields' own header (icon and name). Off gives the value the whole tile. */
     val countHeader: Boolean = true,
+    val vehiclesHeader: Boolean = true,
     val speedHeader: Boolean = true,
     val distanceHeader: Boolean = true,
     val rateHeader: Boolean = true,

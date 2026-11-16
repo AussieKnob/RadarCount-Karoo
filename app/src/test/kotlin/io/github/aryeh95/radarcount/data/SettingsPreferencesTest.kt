@@ -42,7 +42,7 @@ class SettingsPreferencesTest {
             SettingsPreferences.write(p, s)
             assertThat(SettingsPreferences.read(p)).isEqualTo(s)
         }
-        val headers = Settings(countHeader = false, speedHeader = true, distanceHeader = false, rateHeader = false, speedMode = SpeedSetting.RELATIVE, comboSpeedMode = SpeedSetting.ABSOLUTE)
+        val headers = Settings(countHeader = false, vehiclesHeader = false, speedHeader = true, distanceHeader = false, rateHeader = false, speedMode = SpeedSetting.RELATIVE, comboSpeedMode = SpeedSetting.ABSOLUTE)
         val p = mutablePreferencesOf()
         SettingsPreferences.write(p, headers)
         assertThat(SettingsPreferences.read(p)).isEqualTo(headers)

@@ -68,6 +68,7 @@ abstract class FieldDataType(
             passCount = 48,
             closingSpeedMps = 20.0,
             riderSpeedMps = 7.0,
+            numVehicles = 2,
             useImperial = false,
             settings = Settings(),
             rideTimeMs = 3_600_000L
@@ -95,6 +96,7 @@ abstract class FieldDataType(
     /** Everything a field render depends on. */
     data class RenderInput(
         val state: RadarStatus,
+        val numVehicles: Int,
         val passCount: Int,
         val closingSpeedMps: Double?,
         val riderSpeedMps: Double,
@@ -142,6 +144,7 @@ abstract class FieldDataType(
         val feed = service.radarFeed
         return combine(
             feed.status,
+            feed.numVehicles,
             feed.passCount,
             feed.closingSpeedMps,
             service.riderSpeedMps,
@@ -159,6 +162,7 @@ abstract class FieldDataType(
                 settings = values[5] as Settings,
                 rideTimeMs = values[6] as Long,
                 lastPass = values[7] as TargetTracker.Pass?
+                numVehicles = values[2] as Int,
             )
         }.distinctUntilChanged()
     }

@@ -133,6 +133,32 @@ class VehicleCountDataType(
         render(context, input, config, density)
 }
 
+/** Number of vehicles when approaching. */
+class NumberVehiclesDataType(
+    radarExtension: RadarCountExtension
+) : FieldDataType(radarExtension, TYPE_ID) {
+
+    companion object {
+        const val TYPE_ID = "vehicle-number"
+
+        private val header = Header(
+            label = R.string.datatype_number,
+            icon = R.drawable.ic_car,
+            shown = { it.vehiclesHeader },
+            showIcons = { it.showIcons }
+        )
+
+        /** The field for [input]. Shared with the settings preview, which shows exactly these pixels. */
+        fun render(context: Context, input: RenderInput, config: ViewConfig, density: Float): FieldFrame {
+            if (!input.connected) return noRadarFrame(context, config, density, input.settings, header)
+            return valueFrame(context, config, density, input.settings, header, if (input.numVehicles > 0) input.numVehicles.toString() else "--")
+        }
+    }
+
+    override fun frame(context: Context, input: RenderInput, config: ViewConfig): FieldFrame =
+        render(context, input, config, density)
+}
+
 /**
  * Speed of the nearest vehicle, relative or absolute per settings, with a
  * RELATIVE or ABSOLUTE tag under it if that is turned on in settings. If
@@ -281,6 +307,7 @@ class ComboDataType(
             val passed = live == null && held != null
             val plan = ComboLayout.plan(
                 active = active,
+                numVehicles = input.numVehicles,
                 count = input.passCount,
                 speed = live ?: held?.let { PassHold.shownSpeed(it, input.useImperial, d.showsAbsolute) },
                 // Always the live distance, never held: "--" once the radar is clear.
@@ -337,6 +364,7 @@ fun renderField(typeId: String, context: Context, input: FieldDataType.RenderInp
             ComboDataType.render(context, input, config, density, active = input.state.traffic != null || held != null, held = held)
         }
         VehicleCountDataType.TYPE_ID -> VehicleCountDataType.render(context, input, config, density)
+        NumberVehiclesDataType.TYPE_ID -> NumberVehiclesDataType.render(context, input, config, density)
         ApproachSpeedDataType.TYPE_ID -> ApproachSpeedDataType.render(context, input, config, density, nowMs)
         ClosestDistanceDataType.TYPE_ID -> ClosestDistanceDataType.render(context, input, config, density)
         VehiclesPerHourDataType.TYPE_ID -> VehiclesPerHourDataType.render(context, input, config, density)
@@ -345,6 +373,7 @@ fun renderField(typeId: String, context: Context, input: FieldDataType.RenderInp
 
 internal fun comboLabels(context: Context, useImperial: Boolean) = ComboLayout.Labels(
     count = context.getString(R.string.combo_count),
+    number = context.getString(R.string.combo_num),
     vehicles = context.getString(R.string.combo_vehicles),
     speedRel = context.getString(R.string.combo_speed_rel),
     speedAbs = context.getString(R.string.combo_speed_abs),

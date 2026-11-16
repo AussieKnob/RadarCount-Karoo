@@ -54,6 +54,10 @@ class RadarFeed(private val karoo: KarooSystemService) {
     @Volatile var packet: RadarPacket? = null
         private set
 
+    /** Number of vehicles approaching rider **/
+    private val _numVehicles = MutableStateFlow(0)
+    val numVehicles: StateFlow<Int> = _numVehicles.asStateFlow()
+
     /** Vehicles that have passed the rider this ride. */
     private val _passCount = MutableStateFlow(0)
     val passCount: StateFlow<Int> = _passCount.asStateFlow()
@@ -145,6 +149,9 @@ class RadarFeed(private val karoo: KarooSystemService) {
         }
         _closingSpeedMps.value = targetTracker.nearestClosingSpeedMps()
         _lastPass.value = targetTracker.lastPass
+        val ranges = next.rangesM.sorted()
+        _numVehicles.value = ranges.size
+
         packet = next
         heardRadar = true
         _status.value = RadarStatus.Live.of(next)
