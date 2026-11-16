@@ -81,6 +81,7 @@ import io.github.aryeh95.radarcount.datatypes.ApproachSpeedDataType
 import io.github.aryeh95.radarcount.datatypes.ClosestDistanceDataType
 import io.github.aryeh95.radarcount.datatypes.ComboDataType
 import io.github.aryeh95.radarcount.datatypes.FieldDataType
+import io.github.aryeh95.radarcount.datatypes.NumberVehiclesDataType
 import io.github.aryeh95.radarcount.datatypes.VehicleCountDataType
 import io.github.aryeh95.radarcount.datatypes.VehiclesPerHourDataType
 import io.github.aryeh95.radarcount.datatypes.render.FieldColors
@@ -247,6 +248,11 @@ fun FieldsTab(repository: SettingsRepository, extension: RadarCountExtension?) {
         FieldCard(R.string.datatype_count, R.string.datatype_count_desc, R.drawable.ic_car, open == VehicleCountDataType.TYPE_ID, { toggle(VehicleCountDataType.TYPE_ID) }) {
             FieldPreviews(VehicleCountDataType.TYPE_ID, config(VehicleCountDataType.TYPE_ID), settings, listOf(null to approaching))
             HeaderToggle(settings.countHeader) { save(settings.copy(countHeader = it)) }
+        }
+
+        FieldCard(R.string.datatype_number, R.string.datatype_number_desc, R.drawable.ic_car, open == NumberVehiclesDataType.TYPE_ID, { toggle(NumberVehiclesDataType.TYPE_ID) }) {
+            FieldPreviews(NumberVehiclesDataType.TYPE_ID, config(NumberVehiclesDataType.TYPE_ID), settings, listOf(null to approaching))
+            HeaderToggle(settings.vehiclesHeader) { save(settings.copy(vehiclesHeader = it)) }
         }
 
         FieldCard(R.string.datatype_speed, R.string.datatype_speed_desc, R.drawable.ic_speed, open == ApproachSpeedDataType.TYPE_ID, { toggle(ApproachSpeedDataType.TYPE_ID) }) {
