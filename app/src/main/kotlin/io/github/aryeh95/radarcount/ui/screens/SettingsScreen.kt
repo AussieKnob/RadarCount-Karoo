@@ -279,6 +279,7 @@ fun FieldsTab(repository: SettingsRepository, extension: RadarCountExtension?) {
             ToggleRow(stringResource(R.string.settings_combo_header), settings.comboHeader) {
                 save(settings.copy(comboHeader = it))
             }
+            Hint(stringResource(R.string.settings_field_header_hint))
             ToggleRow(stringResource(R.string.settings_combo_captions), settings.comboCaptions) {
                 save(settings.copy(comboCaptions = it))
             }
