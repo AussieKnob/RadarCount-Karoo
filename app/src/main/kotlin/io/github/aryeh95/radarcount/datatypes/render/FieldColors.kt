@@ -12,7 +12,8 @@ import io.github.aryeh95.radarcount.data.ThemeSetting
  */
 object FieldColors {
     /** The radar icon in the Radar field's header: a green that reads on white and on black. */
-    const val RADAR_HEADER_GREEN = 0xFF00A844.toInt()
+    const val RADAR_HEADER_GREEN = 0xFF31E09A.toInt()
+    const val RADAR_HEADER_GREEN_DAY = 0xFF129A5E.toInt()
     /** NO RADAR, in day and night mode alike. */
     const val NO_RADAR_GREY = 0xFF8A8A8A.toInt()
     /** Developer aid: translucent blue over the field's whole view. */
@@ -22,6 +23,8 @@ object FieldColors {
     private const val TEXT_NIGHT = 0xFFFFFFFF.toInt()
     private const val LABEL_DAY = 0xFF555555.toInt()
     private const val LABEL_NIGHT = 0xFFBBBBBB.toInt()
+    private const val LABEL_DAY = 0xFF000000.toInt()
+    private const val LABEL_NIGHT = 0xFFFFFFFF.toInt()
     /**
      * A passed car's held speed, dimmer than the live text. Tuned in
      * sunlight on a Karoo 2: the caption grey (BB) read the same as a live

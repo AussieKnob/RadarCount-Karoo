@@ -107,9 +107,12 @@ private fun TabColumn(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CardWhite)
+            // background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         content()
         Spacer(modifier = Modifier.height(72.dp))

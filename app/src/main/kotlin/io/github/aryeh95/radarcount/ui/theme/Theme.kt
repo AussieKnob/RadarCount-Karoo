@@ -31,7 +31,7 @@ val KarooSlate = Color(0xFF214559)
 val ClearGreen = Color(0xFF00C853)
 
 /** The Status tab with a car behind, below the top threat level. */
-val ApproachAmber = Color(0xFFFF9100)
+val ApproachAmber = Color(0xFFFBE401)
 
 /** The Status tab at the radar's highest threat level. */
 val DangerRed = Color(0xFFFF1744)

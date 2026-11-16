@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import io.github.aryeh95.radarcount.R
 import io.github.aryeh95.radarcount.RadarCountExtension
 import io.github.aryeh95.radarcount.data.SettingsRepository
+import io.github.aryeh95.radarcount.ui.theme.CardWhite
 
 /**
  * The app's one screen: a tab row in the style other Karoo extensions use,
@@ -43,7 +44,8 @@ fun MainScreen(repository: SettingsRepository, extension: RadarCountExtension?, 
     }
     if (tab >= titles.size) tab = 0
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+//    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier = Modifier.fillMaxSize().background(CardWhite)) {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
             // Fixed row: every tab visible. Four titles share 256 dp on a
             // Karoo 3, so the default 16 dp tab padding is replaced by 4 dp.
@@ -61,7 +63,7 @@ fun MainScreen(repository: SettingsRepository, extension: RadarCountExtension?, 
                 }
             }
             when (tab) {
-                0 -> StatusTab(extension, onResetCount = { extension?.radarFeed?.resetPassCounts() })
+                0 -> StatusTab(repository, extension, onResetCount = { extension?.radarFeed?.resetPassCounts() })
                 1 -> GeneralSettingsTab(repository)
                 2 -> FieldsTab(repository, extension)
                 3 -> DeveloperTab(repository, extension)
