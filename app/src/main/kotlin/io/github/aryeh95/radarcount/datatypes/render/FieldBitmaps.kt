@@ -51,7 +51,7 @@ object FieldBitmaps {
      * left if the host's view is taller than the tile it reported.
      * Transparent where nothing is drawn.
      */
-    fun combo(context: Context, plan: ComboLayout.Plan, config: ViewConfig, density: Float, palette: FieldColors.Palette, header: Boolean): ComboImage {
+    fun combo(context: Context, plan: ComboLayout.Plan, config: ViewConfig, density: Float, palette: FieldColors.Palette, header: Boolean, threatLevel: Int): ComboImage {
         val w = config.viewSize.first.coerceAtLeast(1)
         val h = config.viewSize.second.coerceAtLeast(1)
         val text = FieldText()
@@ -68,6 +68,8 @@ object FieldBitmaps {
         for (t in a.texts) {
             // Captions in the label grey; a held pass speed in the darker held grey.
             val color = when {
+                // Set palette based on threatLevel; yellow only
+                threatLevel != 0 -> palette.threat
                 t.font == FieldFont.CAPTION -> palette.label
                 t.dim -> palette.held
                 else -> palette.text
@@ -76,7 +78,9 @@ object FieldBitmaps {
         }
         val strip = if (header) {
             val b = newBitmap(w, headerPx)
-            FieldImage(b, drawHeader(context, Canvas(b), text, w, headerPx.toFloat(), density, palette.text))
+            FieldImage(b, drawHeader(context, Canvas(b), text, w, headerPx.toFloat(), density,
+                // Set palette based on threatLevel; yellow only
+                color = if (threatLevel != 0) palette.threat else palette.text))
         } else {
             null
         }

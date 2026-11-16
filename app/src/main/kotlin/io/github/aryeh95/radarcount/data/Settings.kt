@@ -54,6 +54,8 @@ data class Settings(
     val rateHeader: Boolean = true,
     /** Reset the ride count when a ride starts recording. */
     val resetOnRideStart: Boolean = true,
+    /** Show threat colours **/
+    val showThreats: Boolean = true,
     /** Radar combo field layout while nothing is on the radar. */
     val comboIdle: ComboIdleSetting = ComboIdleSetting.COUNT,
     /** Radar combo field layout while a vehicle is on the radar. */

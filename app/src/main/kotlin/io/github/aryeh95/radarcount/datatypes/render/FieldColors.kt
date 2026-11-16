@@ -25,6 +25,7 @@ object FieldColors {
     private const val LABEL_NIGHT = 0xFFBBBBBB.toInt()
     private const val LABEL_DAY = 0xFF000000.toInt()
     private const val LABEL_NIGHT = 0xFFFFFFFF.toInt()
+    private const val THREAT_DAY_NIGHT = 0xFF000000.toInt()
     /**
      * A passed car's held speed, dimmer than the live text. Tuned in
      * sunlight on a Karoo 2: the caption grey (BB) read the same as a live
@@ -37,7 +38,7 @@ object FieldColors {
     private const val ICON_NIGHT = 0xFF31E09A.toInt()
 
     /** [icon] is the single fields' header icon while a radar is connected; without one it takes [text], as the Karoo's own icons do without data. [held] is a passed car's held speed. */
-    data class Palette(val text: Int, val label: Int, val icon: Int, val held: Int)
+    data class Palette(val text: Int, val label: Int, val icon: Int, val held: Int, val threat: Int)
 
     /** Whether [context] is in night mode: what AUTO follows. */
     fun systemNight(context: Context): Boolean =
@@ -50,7 +51,7 @@ object FieldColors {
     }
 
     fun palette(night: Boolean): Palette =
-        if (night) Palette(TEXT_NIGHT, LABEL_NIGHT, ICON_NIGHT, HELD_NIGHT) else Palette(TEXT_DAY, LABEL_DAY, ICON_DAY, HELD_DAY)
+        if (night) Palette(TEXT_NIGHT, LABEL_NIGHT, ICON_NIGHT, HELD_NIGHT, THREAT_DAY_NIGHT) else Palette(TEXT_DAY, LABEL_DAY, ICON_DAY, HELD_DAY, THREAT_DAY_NIGHT)
 
     /** Text colours for [theme] as the field in [context] shows them. */
     fun palette(context: Context, theme: ThemeSetting): Palette = palette(night(theme, systemNight(context)))

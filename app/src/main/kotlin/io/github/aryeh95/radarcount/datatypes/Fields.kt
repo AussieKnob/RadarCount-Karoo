@@ -37,11 +37,16 @@ private class Header(val icon: Int, val label: (Settings) -> Int, val shown: (Se
  */
 private fun valueFrame(
     context: Context, config: ViewConfig, density: Float, settings: Settings, header: Header, text: String,
-    tag: String? = null, dim: Boolean = false, layoutSample: String? = null
+    tag: String? = null, dim: Boolean = false, layoutSample: String? = null, threatLevel: Int = 0
 ): FieldFrame {
     val palette = FieldColors.palette(context, settings.theme)
+    val textColor = when {
+        dim -> palette.held
+        threatLevel != 0 -> palette.threat
+        else -> palette.text
+    }
     return singleFrame(context, config, density, settings, header.takeIf { it.shown(settings) }, palette, palette.icon) { roomH ->
-        FieldBitmaps.value(text, tag, if (dim) palette.held else palette.text, palette.label, config, density, roomH, layoutSample)
+        FieldBitmaps.value(text, tag, textColor, palette.label, config, density, roomH, layoutSample)
     }
 }
 
@@ -304,7 +309,7 @@ class ComboDataType(
             if (!input.connected) return noRadarFrame(context, config, density, input.settings)
             val d = derive(input, input.settings.comboSpeedMode)
             val live = if (d.tracked) d.shownSpeed else null
-            val passed = live == null && held != null
+            val passed = live == null && held != null && input.threatLevel == 0 // added threatLevel to improve vehicles appearing whilst passed
             val plan = ComboLayout.plan(
                 active = active,
                 numVehicles = input.numVehicles,
@@ -320,14 +325,17 @@ class ComboDataType(
                 passed = passed,
             )
             val s = input.settings
-            val image = FieldBitmaps.combo(context, plan, config, density, FieldColors.palette(context, s.theme), header = s.comboHeader)
+
+            // Set threatLevel if showThreats enabled otherwise return 0
+            val threats = if(s.showThreats && input.numVehicles > 0) input.threatLevel else 0
 
             // comboIdle when no vehicle in radar and not passed irrespective  of ComboIdleSetting setting
             val comboIdleStatus = !active && !passed
             val showComboIdle = s.comboIdle == ComboIdleSetting.COUNT
 
             // Developer aid: tint the whole view so where the host really puts it shows.
-            return FieldViews.tile(context, image, tint = if (s.debugFieldBounds) FieldColors.DEBUG_TINT else null)
+            return FieldViews.tile(context, image, tint = if (s.debugFieldBounds) FieldColors.DEBUG_TINT else null,
+                threatLevel = threats, boundsEnabled = config.boundariesEnabled, previewEnabled = config.preview)
         }
     }
 

@@ -58,6 +58,10 @@ class RadarFeed(private val karoo: KarooSystemService) {
     private val _numVehicles = MutableStateFlow(0)
     val numVehicles: StateFlow<Int> = _numVehicles.asStateFlow()
 
+    /** Threat level **/
+    private val _threatLevel = MutableStateFlow(0)
+    val threatLevel: StateFlow<Int> = _threatLevel.asStateFlow()
+
     /** Maximum speed a vehicle approaching rider this ride **/
     private val _maxSpeed = MutableStateFlow(0.0)
     val maxSpeed: StateFlow<Double> = _maxSpeed.asStateFlow()
@@ -155,6 +159,8 @@ class RadarFeed(private val karoo: KarooSystemService) {
         _lastPass.value = targetTracker.lastPass
         val ranges = next.rangesM.sorted()
         _numVehicles.value = ranges.size
+
+        _threatLevel.value = next.level
 
         val closingSpeedMps = targetTracker.nearestClosingSpeedMps() ?: 0.0
         val potentialMaxSpeedMps = riderSpeedMps + closingSpeedMps

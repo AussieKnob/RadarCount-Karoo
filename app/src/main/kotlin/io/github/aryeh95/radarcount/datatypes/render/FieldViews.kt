@@ -38,13 +38,27 @@ object FieldViews {
      * centred under it; together the size of the tile. [tint] paints the
      * whole view to show its real bounds.
      */
-    fun tile(context: Context, image: ComboImage, tint: Int?): FieldFrame {
+    fun tile(context: Context, image: ComboImage, tint: Int?, threatLevel: Int, boundsEnabled: Boolean, previewEnabled: Boolean): FieldFrame {
         val layout = if (image.header != null) R.layout.field_tile_header else R.layout.field_tile
         val views = RemoteViews(context.packageName, layout)
         val images = mutableMapOf(R.id.field_image to image.body)
         image.header?.let { images[R.id.field_header] = it }
         for ((id, i) in images) views.setImageViewBitmap(id, i.bitmap)
         if (tint != null) views.setInt(R.id.field_root, "setBackgroundColor", tint)
+
+        // Set backgroundRes based on threatLevel
+        val backgroundRes = when (threatLevel) {
+            1, 2 -> if (boundsEnabled || previewEnabled) R.drawable.radar_bg_approaching else R.drawable.radar_bg_approaching_square
+            3 -> if (boundsEnabled || previewEnabled) R.drawable.radar_bg_danger else R.drawable.radar_bg_danger_square
+            else -> 0
+        }
+
+        if (backgroundRes != 0) {
+            views.setInt(R.id.field_root, "setBackgroundResource", backgroundRes)
+        } else {
+            views.setInt(R.id.field_root, "setBackgroundResource", 0)
+        }
+
         return FieldFrame(views, images, layout, tint)
     }
 

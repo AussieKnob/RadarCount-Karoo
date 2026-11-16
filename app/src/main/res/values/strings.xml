@@ -100,6 +100,7 @@
     <string name="settings_collapse">Collapse</string>
     <string name="settings_reset_defaults">Restore defaults</string>
     <string name="settings_reset_defaults">Restore Defaults</string>
+    <string name="settings_show_threats">Show threat level</string>
     <string name="settings_back">Back</string>
     <string name="settings_version">Version %s</string>
     <string name="settings_trace_tracks">Record track trace</string>
