@@ -30,6 +30,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -41,7 +44,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -126,6 +128,8 @@ fun GeneralSettingsTab(repository: SettingsRepository) {
     val scope = rememberCoroutineScope()
     fun save(s: Settings) = scope.launch { repository.update(s) }
 
+    var defaultDialogVisible by remember { mutableStateOf(false) }
+
     TabColumn {
         EnumDropdown(
             title = stringResource(R.string.settings_units),
@@ -156,10 +160,47 @@ fun GeneralSettingsTab(repository: SettingsRepository) {
             save(settings.copy(resetOnRideStart = it))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-        TextButton(onClick = { scope.launch { repository.resetChoices() } }) {
-            Text(stringResource(R.string.settings_reset_defaults), color = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                defaultDialogVisible = true
+                //scope.launch { repository.resetChoices() }
+                      },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BackButton,
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.settings_reset_defaults),
+            )
         }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (defaultDialogVisible){
+            AlertDialog(
+                onDismissRequest = { defaultDialogVisible = false },
+                confirmButton = {
+                    Button(onClick = {
+                        defaultDialogVisible = false
+                        scope.launch { repository.resetChoices() }
+                    },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BackButton),
+                    ) { Text("OK") }
+                },
+                dismissButton = {
+                    Button(onClick = {
+                        defaultDialogVisible = false
+                    },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BackButton),
+                        ) { Text("Cancel") }
+                },
+                title = { Text("Reset Defaults") }, text = { Text("Do really want to restore all settings back to defaults?") }
+            )
+        }
+
         // Five taps on the version line unlock a Developer tab, as on
         // Android. It holds diagnostics for ride-file analysis.
         var versionTaps by remember { mutableIntStateOf(0) }
@@ -469,8 +510,15 @@ fun DeveloperTab(repository: SettingsRepository, extension: RadarCountExtension?
             save(settings.copy(debugFieldBounds = it))
         }
         Hint("Paints the Radar field's whole view blue so the area the Karoo actually gives it is visible.")
-        TextButton(onClick = { save(settings.copy(developerMode = false, traceTracks = false, debugFieldBounds = false)) }) {
-            Text(stringResource(R.string.settings_developer_hide), color = MaterialTheme.colorScheme.primary)
+        Button(
+            onClick = { save(settings.copy(developerMode = false, traceTracks = false, debugFieldBounds = false)) },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BackButton,
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.settings_developer_hide),
+            )
         }
     }
 }
