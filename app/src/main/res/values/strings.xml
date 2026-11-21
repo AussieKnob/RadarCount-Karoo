@@ -100,6 +100,7 @@
     <string name="settings_show_icons">Data icons</string>
     <string name="settings_show_icons_hint">Toggles the data field header icon(s).</string>
     <string name="settings_show_threats">Show threat level</string>
+    <string name="settings_show_threats_hint">Toggles threat level colours for vehicle approaching in radar data fields.</string>
     <string name="settings_back">Back</string>
     <string name="settings_version">Version %s</string>
     <string name="settings_trace_tracks">Record track trace</string>

@@ -162,6 +162,7 @@ fun GeneralSettingsTab(repository: SettingsRepository) {
         ToggleRow(stringResource(R.string.settings_show_threats), settings.showThreats) {
             save(settings.copy(showThreats = it))
         }
+        Hint(stringResource(R.string.settings_show_threats_hint))
         ToggleRow(stringResource(R.string.settings_reset_on_ride_start), settings.resetOnRideStart) {
             save(settings.copy(resetOnRideStart = it))
         }
