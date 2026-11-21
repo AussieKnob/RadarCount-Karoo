@@ -127,7 +127,7 @@ class RadarCountExtension : KarooExtension(EXTENSION_ID, BuildConfig.VERSION_NAM
         fieldViewConfigs.update { it + (typeId to config) }
         val encoded = FieldSizes.encode(config)
         if (settingsRepository.settings.value.fieldSizes[typeId] != encoded) {
-            CoroutineScope(Dispatchers.IO).launch { settingsRepository.saveFieldSize(typeId, encoded) }
+            mainScope.launch(Dispatchers.IO) { settingsRepository.saveFieldSize(typeId, encoded) }
         }
     }
 
@@ -169,8 +169,8 @@ class RadarCountExtension : KarooExtension(EXTENSION_ID, BuildConfig.VERSION_NAM
         Log.i(TAG, "RadarCount ${BuildConfig.VERSION_NAME} starting")
 
         karoo = KarooSystemService(this)
-        radarFeed = RadarFeed(karoo)
         settingsRepository = SettingsRepository.of(this)
+        radarFeed = RadarFeed(karoo, settingsRepository)
 
         imperialUnits = combine(profileImperial, settings) { profile, s ->
             when (s.units) {
