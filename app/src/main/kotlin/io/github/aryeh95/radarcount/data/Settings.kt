@@ -74,12 +74,8 @@ data class Settings(
     val comboPassHold: PassHoldSetting = PassHoldSetting.OFF,
     /** Which speed the Radar field shows. */
     val comboSpeedMode: SpeedSetting = SpeedSetting.ABSOLUTE,
-    /** Developer section shown in Settings; unlocked with five taps on the version line. */
-    val developerMode: Boolean = false,
     /** Write a per-track decision log during rides. Developer setting; off by default. */
     val traceTracks: Boolean = false,
-    /** Tint the Radar field's view so its real bounds show. Developer setting. */
-    val debugFieldBounds: Boolean = false,
     /**
      * Last size the Karoo gave each field in a ride, by type id, as
      * [FieldSizes] encodes it, so the settings previews are right after a

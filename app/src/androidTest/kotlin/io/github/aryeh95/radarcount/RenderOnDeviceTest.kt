@@ -129,8 +129,6 @@ class RenderOnDeviceTest {
             Case("bare", listOf(threat.copy(settings = bare))),
             Case("bare-clear", listOf(clear.copy(settings = bare))),
             Case("dark", listOf(threat.copy(settings = threat.settings.copy(theme = ThemeSetting.DARK)))),
-            Case("tint", listOf(threat.copy(settings = threat.settings.copy(debugFieldBounds = true)))),
-            Case("tint-bare-clear", listOf(clear.copy(settings = bare.copy(debugFieldBounds = true)))),
             // The single fields with their header turned off: the value has the whole tile.
             Case("no-header", listOf(threat.copy(settings = threat.settings.copy(countHeader = false, speedHeader = false, distanceHeader = false, rateHeader = false)))),
             Case("no-header-no-radar", listOf(threat.copy(state = RadarStatus.Off, closingSpeedMps = null, settings = threat.settings.copy(countHeader = false, speedHeader = false, distanceHeader = false, rateHeader = false)))),

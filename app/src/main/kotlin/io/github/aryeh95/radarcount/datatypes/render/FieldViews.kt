@@ -34,8 +34,7 @@ object FieldViews {
 
     /**
      * The Radar field: the header strip at the top, if shown, and the cells
-     * centred under it; together the size of the tile. [tint] paints the
-     * whole view to show its real bounds.
+     * centred under it; together the size of the tile.
      */
     fun tile(context: Context, image: ComboImage, threatLevel: Int, boundsEnabled: Boolean, previewEnabled: Boolean): FieldFrame {
         val layout = if (image.header != null) R.layout.field_tile_header else R.layout.field_tile

@@ -78,7 +78,6 @@
     <string name="tab_status">Status</string>
     <string name="tab_settings">Setup</string>
     <string name="tab_radar_field">Field</string>
-    <string name="tab_developer">Dev</string>
     <string name="settings_radar_field_hint">The Radar data field changes layout when a vehicle is on the radar. Choose what each state shows.</string>
     <string name="settings_fields_hint">Tap a data field to see it as it looks on your ride pages, drawn at the size it last had and change its settings.</string>
     <string name="settings_combo_idle">No vehicle on radar</string>
@@ -105,5 +104,4 @@
     <string name="settings_version">Version %s</string>
     <string name="settings_trace_tracks">Record track trace</string>
     <string name="settings_trace_tracks_hint">Writes one line per radar track decision to a file during rides, for diagnosing counts. Files are in the app\'s private storage under tracks/.</string>
-    <string name="settings_developer_hide">Hide Developer Settings</string>
 </resources>

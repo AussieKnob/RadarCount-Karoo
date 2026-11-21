@@ -40,7 +40,6 @@ fun MainScreen(repository: SettingsRepository, extension: RadarCountExtension?, 
         add(stringResource(R.string.tab_status))
         add(stringResource(R.string.tab_settings))
         add(stringResource(R.string.tab_radar_field))
-        if (settings.developerMode) add(stringResource(R.string.tab_developer))
     }
     if (tab >= titles.size) tab = 0
 
@@ -66,7 +65,6 @@ fun MainScreen(repository: SettingsRepository, extension: RadarCountExtension?, 
                 0 -> StatusTab(repository, extension, onResetCount = { extension?.radarFeed?.resetPassCounts() })
                 1 -> GeneralSettingsTab(repository)
                 2 -> FieldsTab(repository, extension)
-                3 -> DeveloperTab(repository, extension)
             }
         }
         BackPill(onClose, Modifier.align(Alignment.BottomStart))

@@ -36,9 +36,7 @@ internal object SettingsPreferences {
     private val KEY_COMBO_CAPTIONS = booleanPreferencesKey("combo_captions")
     private val KEY_COMBO_HEADER = booleanPreferencesKey("combo_header")
     private val KEY_COMBO_PASS_HOLD = stringPreferencesKey("combo_pass_hold")
-    private val KEY_DEVELOPER_MODE = booleanPreferencesKey("developer_mode")
     private val KEY_TRACE_TRACKS = booleanPreferencesKey("trace_tracks")
-    private val KEY_DEBUG_FIELD_BOUNDS = booleanPreferencesKey("debug_field_bounds")
 
     /** Field sizes are kept one key per field type: "field_size_" and its type id. */
     private const val FIELD_SIZE_PREFIX = "field_size_"
@@ -72,9 +70,7 @@ internal object SettingsPreferences {
         comboCaptions = p[KEY_COMBO_CAPTIONS] ?: true,
         comboHeader = p[KEY_COMBO_HEADER] ?: true,
         comboPassHold = p[KEY_COMBO_PASS_HOLD].enumOr(PassHoldSetting.OFF),
-        developerMode = p[KEY_DEVELOPER_MODE] ?: false,
         traceTracks = p[KEY_TRACE_TRACKS] ?: false,
-        debugFieldBounds = p[KEY_DEBUG_FIELD_BOUNDS] ?: false,
         fieldSizes = readFieldSizes(p)
     )
 
@@ -116,9 +112,7 @@ internal object SettingsPreferences {
         p[KEY_COMBO_CAPTIONS] = settings.comboCaptions
         p[KEY_COMBO_HEADER] = settings.comboHeader
         p[KEY_COMBO_PASS_HOLD] = settings.comboPassHold.name
-        p[KEY_DEVELOPER_MODE] = settings.developerMode
         p[KEY_TRACE_TRACKS] = settings.traceTracks
-        p[KEY_DEBUG_FIELD_BOUNDS] = settings.debugFieldBounds
     }
 
     /** Records the size field [typeId] was given, as [FieldSizes.encode] gives it. */

@@ -48,7 +48,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -167,6 +166,11 @@ fun GeneralSettingsTab(repository: SettingsRepository) {
             save(settings.copy(resetOnRideStart = it))
         }
 
+        ToggleRow(stringResource(R.string.settings_trace_tracks), settings.traceTracks) {
+            save(settings.copy(traceTracks = it))
+        }
+        Hint(stringResource(R.string.settings_trace_tracks_hint))
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
@@ -208,22 +212,12 @@ fun GeneralSettingsTab(repository: SettingsRepository) {
             )
         }
 
-        // Five taps on the version line unlock a Developer tab, as on
-        // Android. It holds diagnostics for ride-file analysis.
-        var versionTaps by remember { mutableIntStateOf(0) }
         Text(
             text = stringResource(R.string.settings_version, if (BuildConfig.DEBUG) BuildConfig.VERSION_NAME else "${BuildConfig.VERSION_NAME} (${BuildConfig.COMMIT})"),
             style = MaterialTheme.typography.bodySmall,
             color = IdleGrey,
             modifier = Modifier
                 .padding(4.dp)
-                .clickable {
-                    versionTaps++
-                    if (versionTaps >= 5) {
-                        versionTaps = 0
-                        if (!settings.developerMode) save(settings.copy(developerMode = true))
-                    }
-                }
         )
     }
 }
@@ -484,50 +478,6 @@ private fun FieldPreview(typeId: String, input: FieldDataType.RenderInput, dark:
             .border(1.dp, Color(0xFFBBBBBB), RoundedCornerShape(6.dp))
     ) {
         bitmap?.let { Image(it, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds) }
-    }
-}
-
-private val FIELD_TYPE_IDS = listOf(
-    ComboDataType.TYPE_ID, VehicleCountDataType.TYPE_ID, ApproachSpeedDataType.TYPE_ID,
-    ClosestDistanceDataType.TYPE_ID, VehiclesPerHourDataType.TYPE_ID
-)
-
-/** Developer diagnostics; the tab appears once unlocked from the version line. */
-@Composable
-fun DeveloperTab(repository: SettingsRepository, extension: RadarCountExtension?) {
-    val settings by repository.settings.collectAsState()
-    val scope = rememberCoroutineScope()
-    fun save(s: Settings) = scope.launch { repository.update(s) }
-    val noConfigs = remember { MutableStateFlow(emptyMap<String, ViewConfig>()) }
-    val liveConfigs by (extension?.fieldViewConfigs ?: noConfigs).collectAsState()
-    val density = LocalDensity.current.density
-
-    TabColumn {
-        Hint(
-            "Field sizes in a ride (density $density):\n" + FIELD_TYPE_IDS.joinToString("\n") { id ->
-                val c = liveConfigs[id] ?: FieldSizes.saved(settings, id)
-                "$id: " + (c?.let { "grid ${it.gridSize.first}x${it.gridSize.second}, view ${it.viewSize.first}x${it.viewSize.second} px, text ${it.textSize} sp, ${it.alignment.name.lowercase()}" + if (id in liveConfigs) "" else " (saved)" }
-                    ?: "not shown in a ride yet")
-            }
-        )
-        ToggleRow(stringResource(R.string.settings_trace_tracks), settings.traceTracks) {
-            save(settings.copy(traceTracks = it))
-        }
-        Hint(stringResource(R.string.settings_trace_tracks_hint))
-        ToggleRow("Tint Radar field bounds", settings.debugFieldBounds) {
-            save(settings.copy(debugFieldBounds = it))
-        }
-        Hint("Paints the Radar field's whole view blue so the area the Karoo actually gives it is visible.")
-        Button(
-            onClick = { save(settings.copy(developerMode = false, traceTracks = false, debugFieldBounds = false)) },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = BackButton,
-            )
-        ) {
-            Text(
-                text = stringResource(R.string.settings_developer_hide),
-            )
-        }
     }
 }
 
