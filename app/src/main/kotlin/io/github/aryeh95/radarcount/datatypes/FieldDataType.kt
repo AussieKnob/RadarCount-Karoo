@@ -59,17 +59,17 @@ abstract class FieldDataType(
         private const val PREVIEW_CYCLE_MS = 2000L
 
         /**
-         * The sample the previews draw: two cars behind at threat level 2,
-         * the nearer 174 m back and closing at 20 m/s on a rider doing
-         * 7 m/s, 48 cars into an hour's ride.
+         * The sample the previews draw: two cars behind at threat level 0,
+         * the nearer 123 m back and closing at 10 m/s on a rider doing
+         * 6 m/s, 42 cars into an hour's ride.
          */
         val PREVIEW_INPUT = RenderInput(
-            state = RadarStatus.Live(level = 2, vehicles = 2, nearestM = 174),
-            threatLevel = 1,
+            state = RadarStatus.Live(level = 0, vehicles = 2, nearestM = 123),
+            threatLevel = 0,
             maxSpeed = 200.0,
-            passCount = 48,
-            closingSpeedMps = 20.0,
-            riderSpeedMps = 7.0,
+            passCount = 42,
+            closingSpeedMps = 10.0,
+            riderSpeedMps = 6.0,
             numVehicles = 2,
             useImperial = false,
             settings = Settings(),
@@ -164,6 +164,13 @@ abstract class FieldDataType(
                 threatLevel  = values[1] as Int,
                 maxSpeed = values[3] as Double,
                 numVehicles = values[2] as Int,
+                passCount = values[4] as Int,
+                closingSpeedMps = values[5] as Double?,
+                riderSpeedMps = values[6] as Double,
+                useImperial = values[7] as Boolean,
+                settings = values[8] as Settings,
+                rideTimeMs = values[9] as Long,
+                lastPass = values[10] as TargetTracker.Pass?
             )
         }.distinctUntilChanged()
     }
