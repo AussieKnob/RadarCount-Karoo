@@ -97,7 +97,7 @@
     <string name="settings_expand">Expand</string>
     <string name="settings_collapse">Collapse</string>
     <string name="settings_reset_defaults">Restore Defaults</string>
-    <string name="settings_show_icons">Data icons</string>
+    <string name="settings_show_icons">Data field icons</string>
     <string name="settings_show_icons_hint">Toggles the data field header icon(s).</string>
     <string name="settings_show_threats">Show threat level</string>
     <string name="settings_show_threats_hint">Toggles threat level colours for vehicle approaching in radar data fields.</string>
