@@ -1,6 +1,7 @@
 package io.github.aryeh95.radarcount.engine
 
 import android.util.Log
+import io.github.aryeh95.radarcount.data.SettingsRepository
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.OnStreamState
@@ -8,6 +9,11 @@ import io.hammerhead.karooext.models.StreamState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -19,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * lock, so two packets delivered back to back can never be applied out
  * of order or half-applied.
  */
-class RadarFeed(private val karoo: KarooSystemService) {
+class RadarFeed(private val karoo: KarooSystemService, private val settingsRepository: SettingsRepository) {
 
     private companion object {
         const val TAG = "RadarFeed"
@@ -110,8 +116,15 @@ class RadarFeed(private val karoo: KarooSystemService) {
         targetTracker.trace = sink
     }
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     /** Open the RADAR stream. Paired with [stop] by the extension's sensor demand count. */
-    fun start() {
+    suspend fun start() {
+        // Restore maximum speed and pass count saved from the previous session
+        val savedSettings = settingsRepository.settings.first()
+        _maxSpeed.value = savedSettings.maxSpeed
+        _passCount.value = savedSettings.passCount
+
         Log.i(TAG, "Opening the RADAR stream")
         val id = karoo.addConsumer(OnStreamState.StartStreaming(DataType.Type.RADAR)) { event: OnStreamState ->
             synchronized(lock) { onStreamState(event.state) }
@@ -153,6 +166,9 @@ class RadarFeed(private val karoo: KarooSystemService) {
         val passed = targetTracker.update(next.rangesM, System.currentTimeMillis(), next.level, riderMps = riderSpeedMps)
         if (passed > 0 && countingEnabled) {
             _passCount.value += passed
+            scope.launch {
+                settingsRepository.incrementPassCount(passed)
+            }
             Log.d(TAG, "Counted $passed, ride total ${_passCount.value}")
         }
         _closingSpeedMps.value = targetTracker.nearestClosingSpeedMps()
@@ -167,6 +183,9 @@ class RadarFeed(private val karoo: KarooSystemService) {
 
         if (potentialMaxSpeedMps > _maxSpeed.value && countingEnabled) {
             _maxSpeed.value = potentialMaxSpeedMps
+            scope.launch {
+                settingsRepository.updateMaxSpeed(potentialMaxSpeedMps)
+            }
             Log.d(TAG, "Max speed recorded $potentialMaxSpeedMps during ride")
         }
 
@@ -215,5 +234,17 @@ class RadarFeed(private val karoo: KarooSystemService) {
             _maxSpeed.value = 0.0
             _lastPass.value = null
         }
+        scope.launch {
+            settingsRepository.resetPassCount()
+            settingsRepository.resetMaxSpeed()
+        }
+    }
+
+    suspend fun restoreMaxSpeed() {
+        _maxSpeed.value = settingsRepository.settings.first().maxSpeed
+    }
+
+    suspend fun restorePassCount() {
+        _passCount.value = settingsRepository.settings.first().passCount
     }
 }

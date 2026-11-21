@@ -50,6 +50,22 @@ class SettingsRepository private constructor(context: Context) {
         store.edit { SettingsPreferences.clearChoices(it) }
     }
 
+    suspend fun updateMaxSpeed(speed: Double) {
+        SettingsPreferences.updateMaxSpeed(store, speed)
+    }
+
+    suspend fun resetMaxSpeed() {
+        SettingsPreferences.updateMaxSpeed(store, 0.0)
+    }
+
+    suspend fun incrementPassCount(increment: Int) {
+        SettingsPreferences.incrementPassCount(store, increment)
+    }
+
+    suspend fun resetPassCount() {
+        SettingsPreferences.resetPassCount(store)
+    }
+
     companion object {
         private lateinit var appContext: Context
         private val shared by lazy { SettingsRepository(appContext) }

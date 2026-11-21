@@ -1,8 +1,12 @@
 package io.github.aryeh95.radarcount.data
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 /**
@@ -43,6 +47,8 @@ internal object SettingsPreferences {
     /** Where the Radar field's size was kept before every field had one. */
     private val KEY_LEGACY_COMBO_FIELD_SIZE = stringPreferencesKey("combo_field_size")
     private const val COMBO_TYPE_ID = "radar-combo"
+    private val KEY_MAX_SPEED_STORE = doublePreferencesKey("max_speed_store")
+    private val KEY_PASS_COUNT_STORE = intPreferencesKey("pass_count_store")
 
     private fun fieldSizeKey(typeId: String) = stringPreferencesKey(FIELD_SIZE_PREFIX + typeId)
 
@@ -71,7 +77,9 @@ internal object SettingsPreferences {
         comboHeader = p[KEY_COMBO_HEADER] ?: true,
         comboPassHold = p[KEY_COMBO_PASS_HOLD].enumOr(PassHoldSetting.OFF),
         traceTracks = p[KEY_TRACE_TRACKS] ?: false,
-        fieldSizes = readFieldSizes(p)
+        fieldSizes = readFieldSizes(p),
+        maxSpeed = p[KEY_MAX_SPEED_STORE] ?: 0.0,
+        passCount = (p[KEY_PASS_COUNT_STORE] ?: 0).coerceAtLeast(0)
     )
 
     private fun readFieldSizes(p: Preferences): Map<String, String> {
@@ -131,4 +139,29 @@ internal object SettingsPreferences {
     /** The constant this stored name spells, or [default] when unset or not a name this version knows. */
     private inline fun <reified T : Enum<T>> String?.enumOr(default: T): T =
         enumValues<T>().firstOrNull { it.name == this } ?: default
+
+    suspend fun updateMaxSpeed(
+        dataStore: DataStore<Preferences>,
+        speed: Double
+    ) {
+        dataStore.edit { preferences ->
+            preferences[KEY_MAX_SPEED_STORE] = speed
+        }
+    }
+
+    suspend fun incrementPassCount(
+        dataStore: DataStore<Preferences>,
+        increment: Int
+    ) {
+        dataStore.edit { preferences ->
+            val current = preferences[KEY_PASS_COUNT_STORE] ?: 0
+            preferences[KEY_PASS_COUNT_STORE] = current + increment
+        }
+    }
+
+    suspend fun resetPassCount(dataStore: DataStore<Preferences>) {
+        dataStore.edit { preferences ->
+            preferences[KEY_PASS_COUNT_STORE] = 0
+        }
+    }
 }

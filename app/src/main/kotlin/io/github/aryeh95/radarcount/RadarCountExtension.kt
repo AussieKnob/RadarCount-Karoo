@@ -246,7 +246,13 @@ class RadarCountExtension : KarooExtension(EXTENSION_ID, BuildConfig.VERSION_NAM
         if (sensorsRunning) return
         sensorsRunning = true
         Log.i(TAG, "Sensors on")
-        radarFeed.start()
+
+        mainScope.launch {
+            radarFeed.restoreMaxSpeed()
+            radarFeed.restorePassCount()
+            radarFeed.start()
+        }
+
         // The rider's speed, for a passing car's absolute speed.
         sensorConsumers += karoo.addConsumer(OnStreamState.StartStreaming(DataType.Type.SPEED)) { event: OnStreamState ->
             (event.state as? StreamState.Streaming)?.dataPoint?.singleValue?.let { speedMs ->

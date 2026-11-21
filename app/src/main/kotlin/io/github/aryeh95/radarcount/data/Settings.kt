@@ -81,5 +81,8 @@ data class Settings(
      * [FieldSizes] encodes it, so the settings previews are right after a
      * restart. Written only by SettingsRepository.saveFieldSize.
      */
-    val fieldSizes: Map<String, String> = emptyMap()
+    val fieldSizes: Map<String, String> = emptyMap(),
+
+    val maxSpeed: Double = 0.0,
+    val passCount: Int = 0
 )
