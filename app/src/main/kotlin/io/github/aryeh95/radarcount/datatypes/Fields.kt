@@ -361,8 +361,7 @@ class ComboDataType(
 
             val image = FieldBitmaps.combo(context, plan, config, density, FieldColors.palette(context, s.theme),
                 header = s.comboHeader, showIcons = s.showIcons, threatLevel = threats, comboIdleStatus = comboIdleStatus, showComboIdle = showComboIdle)
-            // Developer aid: tint the whole view so where the host really puts it shows.
-            return FieldViews.tile(context, image, tint = if (s.debugFieldBounds) FieldColors.DEBUG_TINT else null,
+            return FieldViews.tile(context, image,
                 threatLevel = threats, boundsEnabled = config.boundariesEnabled, previewEnabled = config.preview)
         }
     }

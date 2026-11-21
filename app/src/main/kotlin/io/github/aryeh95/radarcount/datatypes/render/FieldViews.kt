@@ -17,12 +17,11 @@ class FieldFrame internal constructor(
     val views: RemoteViews,
     val images: Map<Int, FieldImage>,
     private val layout: Int,
-    private val tint: Int?,
     val header: HeaderImage? = null
 ) {
     /** True when [other] puts exactly the same pixels on screen, so this frame need not be sent. */
     fun looksLike(other: FieldFrame?): Boolean =
-        other != null && layout == other.layout && tint == other.tint && images.keys == other.images.keys &&
+        other != null && layout == other.layout && images.keys == other.images.keys &&
             images.all { (id, image) -> image.bitmap.sameAs(other.images.getValue(id).bitmap) }
 }
 
@@ -38,13 +37,12 @@ object FieldViews {
      * centred under it; together the size of the tile. [tint] paints the
      * whole view to show its real bounds.
      */
-    fun tile(context: Context, image: ComboImage, tint: Int?, threatLevel: Int, boundsEnabled: Boolean, previewEnabled: Boolean): FieldFrame {
+    fun tile(context: Context, image: ComboImage, threatLevel: Int, boundsEnabled: Boolean, previewEnabled: Boolean): FieldFrame {
         val layout = if (image.header != null) R.layout.field_tile_header else R.layout.field_tile
         val views = RemoteViews(context.packageName, layout)
         val images = mutableMapOf(R.id.field_image to image.body)
         image.header?.let { images[R.id.field_header] = it }
         for ((id, i) in images) views.setImageViewBitmap(id, i.bitmap)
-        if (tint != null) views.setInt(R.id.field_root, "setBackgroundColor", tint)
 
         // Set backgroundRes based on threatLevel
         val backgroundRes = when (threatLevel) {
@@ -59,7 +57,7 @@ object FieldViews {
             views.setInt(R.id.field_root, "setBackgroundResource", 0)
         }
 
-        return FieldFrame(views, images, layout, tint)
+        return FieldFrame(views, images, layout)
     }
 
     /**
@@ -77,7 +75,7 @@ object FieldViews {
         val images = mutableMapOf(R.id.field_image to image)
         if (header != null) images[R.id.field_header] = header.image else views.setViewVisibility(R.id.field_header, View.GONE)
         for ((id, i) in images) views.setImageViewBitmap(id, i.bitmap)
-        return FieldFrame(views, images, layout, null, header)
+        return FieldFrame(views, images, layout, header)
     }
 
     /**

@@ -16,9 +16,6 @@ object FieldColors {
     const val RADAR_HEADER_GREEN_DAY = 0xFF129A5E.toInt()
     /** NO RADAR, in day and night mode alike. */
     const val NO_RADAR_GREY = 0xFF8A8A8A.toInt()
-    /** Developer aid: translucent blue over the field's whole view. */
-    const val DEBUG_TINT = 0x593366FF
-
     private const val TEXT_DAY = 0xFF000000.toInt()
     private const val TEXT_NIGHT = 0xFFFFFFFF.toInt()
     private const val LABEL_DAY = 0xFF000000.toInt()
