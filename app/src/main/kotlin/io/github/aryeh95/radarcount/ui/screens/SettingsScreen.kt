@@ -491,7 +491,7 @@ private fun FieldPreview(typeId: String, input: FieldDataType.RenderInput, dark:
 fun BackPill(onClick: () -> Unit, modifier: Modifier) {
     Surface(
         onClick = onClick,
-        modifier = modifier.padding(bottom = 16.dp).offset(x = (-8).dp).size(width = 62.dp, height = 50.dp),
+        modifier = modifier.padding(bottom = 10.dp).offset(x = (-8).dp).size(width = 62.dp, height = 50.dp),
         shape = RoundedCornerShape(topEnd = 26.dp, bottomEnd = 26.dp),
         color = BackButton
     ) {
